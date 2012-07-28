@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="611827e9-fac3-4230-8bd9-4834daecd4ed" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://sooke/AQUARIUS/AquariusDataService.svc" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="AquariusDataService22.xsd" MetadataType="Schema" ID="e4d9bd8d-f2ac-42be-87da-dd31efa71865" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?xsd=xsd8" />
+    <MetadataFile FileName="AquariusDataService5.wsdl" MetadataType="Wsdl" ID="f660e836-10d5-4088-8dbb-2ff342fe092b" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?wsdl" />
+    <MetadataFile FileName="AquariusDataService3.disco" MetadataType="Disco" ID="205aa273-682c-4908-89a4-e2704badfe72" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?disco" />
+    <MetadataFile FileName="AquariusDataService23.xsd" MetadataType="Schema" ID="e1eb7132-1444-423c-b444-8bd3c78553c6" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?xsd=xsd6" />
+    <MetadataFile FileName="AquariusDataService24.xsd" MetadataType="Schema" ID="e2d0c19a-c952-496b-b803-54a2de907f29" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?xsd=xsd3" />
+    <MetadataFile FileName="AquariusDataService25.xsd" MetadataType="Schema" ID="5aa9b15f-38f1-452e-a561-4a6a58c44d87" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?xsd=xsd10" />
+    <MetadataFile FileName="AquariusDataService26.xsd" MetadataType="Schema" ID="b7f790c3-da46-46d9-a7b1-7e4c7ece6011" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?xsd=xsd4" />
+    <MetadataFile FileName="AquariusDataService27.xsd" MetadataType="Schema" ID="225fa619-bbd1-477a-8a29-d8c2d5e7bbec" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?xsd=xsd2" />
+    <MetadataFile FileName="AquariusDataService28.xsd" MetadataType="Schema" ID="3238be97-ac7d-4d69-a31a-570c16ad2565" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?xsd=xsd9" />
+    <MetadataFile FileName="AquariusDataService6.wsdl" MetadataType="Wsdl" ID="92486581-00cf-4be6-a2c8-cc1732aae9b0" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?wsdl=wsdl0" />
+    <MetadataFile FileName="AquariusDataService29.xsd" MetadataType="Schema" ID="f58d3f54-e331-4e64-8cf0-574c2a87fafe" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?xsd=xsd1" />
+    <MetadataFile FileName="AquariusDataService30.xsd" MetadataType="Schema" ID="44057633-d6aa-42ef-805e-9bfadc0aea2c" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?xsd=xsd7" />
+    <MetadataFile FileName="AquariusDataService31.xsd" MetadataType="Schema" ID="49950a94-a22a-4558-86c1-58ed8b4c80c9" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?xsd=xsd0" />
+    <MetadataFile FileName="AquariusDataService32.xsd" MetadataType="Schema" ID="525c324a-d545-4630-aaec-ccbf1c0ac4da" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AquariusDataService.svc?xsd=xsd5" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>
