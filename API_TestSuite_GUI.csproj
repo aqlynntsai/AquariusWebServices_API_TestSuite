@@ -1,0 +1,399 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3C1DCEB7-46A3-45A4-AB2D-353DE76DDBD4}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>API_TestSuite_GUI</RootNamespace>
+    <AssemblyName>API_TestSuite_GUI</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PwBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PwBox.Designer.cs">
+      <DependentUpon>PwBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service References\AASreference\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\ADSreference\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\APSreference\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Tests.cs" />
+    <EmbeddedResource Include="PwBox.resx">
+      <DependentUpon>PwBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\DataSources\System.Data.DataSet.datasource" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <None Include="Service References\AASreference\API_TestSuite_GUI.AASreference.AppendResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\AASreference\API_TestSuite_GUI.AASreference.FieldVisit.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\AASreference\API_TestSuite_GUI.AASreference.LocationDTO.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\AASreference\API_TestSuite_GUI.AASreference.TimeSeriesDescription.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.ApprovalCode.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.ApprovalLevel.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.AQAtom_Site.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.AQServerLicenseError.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.AQSiteVisitType_T.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.AquariusUserData.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.AutomationTriggerItem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.AutomationWorkflowItem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.Benchmark.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.BenchmarkHistory.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.DatasetAutomation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.DBObjectInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.DiscreteMeasurement.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.ExpandedRatingTable.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.ExportTimeSeriesResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.FlagDTO.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.FlagSystem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.GlobalSetting.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.HotFolderAvailability.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.HotFolderInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.HydroMLAtom.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.LevelingSurveyType_T.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.Location.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.LocationAttributes.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.LocationDataSummary.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.LocationFolderTypeSystem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.LocationRemark.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.LocationRole.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.LocationTypeSystem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.LocationVerticalDatum.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.LocationVisitAttachment.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.NotificationRuleset.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.OutgoingNotification.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.ParameterDTO.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.PubExcludeApproval.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.PublishingExcludeApprovalSystem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.PublishingView.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.PublishingViewApproval.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.PublishingViewApprovalSystem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.PublishingViewSystem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.QualityCodeDTO.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.QualityCodeSystem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.ReportDescription.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.ReportListItem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.ReportTemplate.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.ResolvedLocationRoleDTO.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.Role.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.RolePermission.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.SiteInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.SpatialReferenceSystem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.SpringboardUserSetting.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.SqlType.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.SurveyedElevation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.TimeSeriesAtom.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.TimezoneSystem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.UnitDTO.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.UnitGroup.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.UnitGroupDTO.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.UnitSystem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.User.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.UserLocationRoleDTO.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.VerticalDatum.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\AASreference\" />
+    <WCFMetadataStorage Include="Service References\ADSreference\" />
+    <WCFMetadataStorage Include="Service References\APSreference\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\APSreference\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\APSreference\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\APSreference\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ADSreference\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ADSreference\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ADSreference\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\AASreference\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\AASreference\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\AASreference\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\AASreference\AQAcquisitionService11.wsdl" />
+    <None Include="Service References\AASreference\AQAcquisitionService5.xsd" />
+    <None Include="Service References\AASreference\AQAcquisitionService51.xsd" />
+    <None Include="Service References\AASreference\AQAcquisitionService52.xsd" />
+    <None Include="Service References\AASreference\AQAcquisitionService53.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\AASreference\AQAcquisitionService11.disco" />
+    <None Include="Service References\AASreference\AQAcquisitionService54.xsd" />
+    <None Include="Service References\ADSreference\AquariusDataService22.xsd" />
+    <None Include="Service References\ADSreference\AquariusDataService5.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.AqObjectMasterSource.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\AquariusDataService23.xsd" />
+    <None Include="Service References\ADSreference\AquariusDataService24.xsd" />
+    <None Include="Service References\ADSreference\AquariusDataService25.xsd" />
+    <None Include="Service References\ADSreference\AquariusDataService26.xsd" />
+    <None Include="Service References\ADSreference\AquariusDataService27.xsd" />
+    <None Include="Service References\ADSreference\AquariusDataService28.xsd" />
+    <None Include="Service References\ADSreference\AquariusDataService29.xsd" />
+    <None Include="Service References\ADSreference\AquariusDataService3.disco" />
+    <None Include="Service References\ADSreference\AquariusDataService30.xsd" />
+    <None Include="Service References\ADSreference\AquariusDataService31.xsd" />
+    <None Include="Service References\ADSreference\AquariusDataService32.xsd" />
+    <None Include="Service References\ADSreference\AquariusDataService6.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\APSreference\AquariusPublishService1.disco" />
+    <None Include="Service References\APSreference\AquariusPublishService1.wsdl" />
+    <None Include="Service References\APSreference\AquariusPublishService3.xsd" />
+    <None Include="Service References\APSreference\AquariusPublishService4.xsd" />
+    <None Include="Service References\APSreference\AquariusPublishService5.xsd" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
