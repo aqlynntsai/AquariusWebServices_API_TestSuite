@@ -1,4 +1,7 @@
-
+*.datasource
+*.wsdl
+*.xsd
+Reference.cs
 #ignore thumbnails created by windows
 Thumbs.db
 #Ignore files build by Visual Studio
@@ -31,3 +34,4 @@ _ReSharper*/
 *.suo
 *.dll
 CVS/
+.#*
