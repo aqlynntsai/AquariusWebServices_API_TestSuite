@@ -616,7 +616,7 @@ namespace Tests
                     dataSetListSince = Suite.APSclient.GetDataSetsList(Suite.tsLoc, changesSince);
                 }
 
-                string[] delims = {"\r\n"};
+                string[] delims = { "\r\n" };
                 string[] linesplitDataSet = dataSetListSince.Split(delims, StringSplitOptions.RemoveEmptyEntries);
 
                 if (linesplitDataSet.Length < 2)
@@ -670,17 +670,20 @@ namespace Tests
     {
         protected delegate string GetTimeSeriesDataAPI(GetTimeSeriesDataQuery query);
         protected GetTimeSeriesDataAPI _queryAPI;
+        protected string _appendData;
 
-        protected GetTimeSeriesDataTest(string name, TestSuite suite, GetTimeSeriesDataAPI queryAPI)
+        protected GetTimeSeriesDataTest(string name, TestSuite suite, string appendDataString, GetTimeSeriesDataAPI queryAPI)
             : base(name, suite)
         {
             _queryAPI = queryAPI;
+            _appendData = appendDataString;
         }
 
-        public GetTimeSeriesDataTest(string name, TestSuite suite)
+        public GetTimeSeriesDataTest(string name, TestSuite suite, string appendDataString)
             : this(
                 name,
                 suite,
+                appendDataString,
                 delegate(GetTimeSeriesDataQuery query)
                 {
                     return suite.APSclient.GetTimeSeriesData(query._dataId, query._publishView, query._queryFromTime, query._queryToTime, query._changesSinceTime, query._asAtTime);
@@ -691,7 +694,46 @@ namespace Tests
 
         public override void RunTest()
         {
-            base.RunTest();
+ 	        base.RunTest();
+            RunGetTimeSeriesDataTest();
+        }
+
+        protected virtual void RunGetTimeSeriesDataTest()
+        {
+            System.Diagnostics.Trace.WriteLine(Name);
+            initializeTimeSeries();
+
+            try
+            {
+                queryGetTimeSeriesDataAPI();
+            }
+            catch (Exception e)
+            {
+                ResultStream("Threw Exception");
+                LoggerStream("Exception Message: " + e.Message);
+            }
+        }
+
+        public virtual void queryGetTimeSeriesDataAPI()
+        {
+            string input = string.Empty;
+            GetTimeSeriesDataQuery query = getQuery(null);
+            input = getTimeSeriesData(query);
+            evaluateSuccess(stringParse(input, 0), stringParse(_appendData, 1));
+        }
+
+        public virtual void initializeTimeSeries(string appendDataString)
+        {
+            System.Diagnostics.Trace.WriteLine(Name);
+            LoggerStream(Name);
+
+            createTS = createNewTS2();
+            appendData(Encoding.ASCII.GetBytes(appendDataString));
+        }
+
+        protected virtual void initializeTimeSeries()
+        {
+            initializeTimeSeries(_appendData);
         }
 
         public string timeStringFormat(DateTime dt, float utcHrs)
@@ -754,9 +796,11 @@ namespace Tests
                 resultString += _queryAPI(getTimeSeriesDataQuery);
             }
             System.Diagnostics.Trace.WriteLine("From APS: " + resultString);
+            LoggerStream("Method Output: " + resultString);
+            
             return resultString;
         }
-        
+
         protected virtual void evaluateSuccess(string[] actual, string[] expected)
         {
             int passCount = 0;
@@ -856,152 +900,72 @@ namespace Tests
 
     public class GetTimeSeriesDataAllTest : GetTimeSeriesDataTest
     {
-        public GetTimeSeriesDataAllTest(string name, TestSuite suite) : base(name, suite) { }
-        public override void RunTest()
+        public GetTimeSeriesDataAllTest(string name, TestSuite suite) : base(name, suite, csv1 + csv2) { }
+    }
+
+    public class GetTimeSeriesDataResampledTest : GetTimeSeriesDataChangesSinceTest
+    {
+        public GetTimeSeriesDataResampledTest(string name, TestSuite suite, string anchorTime)
+            : base(name, suite, anchorTime)
         {
-            base.RunTest();
-            GetTimeSeriesData_test();
+
+            _queryAPI = delegate(GetTimeSeriesDataQuery query)
+                {
+                    return suite.APSclient.GetTimeSeriesDataResampled(query._dataId, query._publishView, query._queryFromTime, query._queryToTime, 10, query._changesSinceTime);
+                };
+            _appendData = csv1 + csv2;
         }
 
-        private void GetTimeSeriesData_test()
+        //private void GetTimeSeriesDataResampledTest()
+        //{
+        //    System.Diagnostics.Trace.WriteLine("Get TS data ALL");
+        //    initializeTimeSeries();
+
+        //    try
+        //    {
+        //        string input = string.Empty;
+        //        GetTimeSeriesDataQuery query = getQuery(null);
+        //        input = getTimeSeriesData(query);
+        //        evaluateSuccess(stringParse(input, 0), stringParse(csv1 + csv2, 1));
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        ResultStream("Threw Exception");
+        //        LoggerStream("Exception Message: " + e.Message);
+        //    }
+        //}
+    }
+
+    public class GetTimeSeriesRawDataAllTest : GetTimeSeriesDataAllTest
+    {
+        public GetTimeSeriesRawDataAllTest(string name, TestSuite suite)
+            : base(name, suite)
         {
-            System.Diagnostics.Trace.WriteLine("Get TS data ALL");
-            LoggerStream("GetTimeSeriesData(All): ");
 
-            createTS = createNewTS2();
-           // string createdTSName;
-            appendData(Encoding.ASCII.GetBytes(csv1 + csv2));
-
-            try
+            _queryAPI = delegate(GetTimeSeriesDataQuery query)
             {
-                string input = string.Empty;
-                GetTimeSeriesDataQuery query = getQuery(null);
-                input = getTimeSeriesData(query);
-                evaluateSuccess(stringParse(input, 0), stringParse(csv1 + csv2, 1));  
-            }
-            catch (Exception e)
-            {
-                ResultStream("Threw Exception");
-                LoggerStream("Exception Message: " + e.Message);
-            }
-        }
-
-        protected override void evaluateSuccess(string[] actual, string[] expected)
-        {
-            int passCount = 0;
-            bool lengthPass = true;
-            bool[] result = new bool[5];
-            string allResult = "";
-
-            if (expected.Length != actual.Length)
-            {
-                ResultStream("FAIL");
-                lengthPass = false;
-                LoggerStream(string.Format("FAIL - Returned {0} points, expected {1} points", actual.Length, expected.Length));
-            }
-            else
-            {
-                int cInd = 0;
-                for (int i = 0; i < expected.Length; i++)
-                {
-                    cInd = i % 5;
-                    switch (cInd)
-                    {
-                        case 0:
-                            System.Diagnostics.Trace.WriteLine("Date: " + actual[i]);
-                            if (expected[i] == actual[i])
-                                result[0] = true;
-                            else
-                            {
-                                result[0] = false;
-                                LoggerStream(string.Format("- Date Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                            }
-                            break;
-                        case 1:
-                            System.Diagnostics.Trace.WriteLine("Value: " + actual[i]);
-                            double e = Convert.ToDouble(expected[i]);
-                            double a = Convert.ToDouble(actual[i]);
-                            if (e.ToString("#0.000") == a.ToString("#0.000"))
-                                result[1] = true;
-                            else
-                            {
-                                result[1] = false;
-                                LoggerStream(string.Format("- Value Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                            }
-                            break;
-                        case 2:
-                            System.Diagnostics.Trace.WriteLine("Quality: " + actual[i]);
-                            if (expected[i] == actual[i])
-                                result[2] = true;
-                            else
-                            {
-                                result[2] = false;
-                                LoggerStream(string.Format("- Quality Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                            }
-                            break;
-                        case 3:
-                            System.Diagnostics.Trace.WriteLine("Interpolation: " + actual[i]);
-                            if (expected[i] == actual[i])
-                                result[3] = true;
-                            else
-                            {
-                                result[3] = false;
-                                LoggerStream(string.Format("- Interpolation Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                            }
-                            break;
-                        case 4:
-                            System.Diagnostics.Trace.WriteLine("Approval: " + actual[i]);
-                            if (expected[i] == actual[i])
-                                result[4] = true;
-                            else
-                            {
-                                result[4] = false;
-                                LoggerStream(string.Format("- Approval Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                            }
-                            break;
-                    }
-                }
-            }
-            if (lengthPass)
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    if (result[i])
-                    {
-                        allResult += "p";
-                        passCount++;
-                    }
-                    else
-                    {
-                        allResult += "F";
-                    }
-                }
-                if (passCount == 5)
-                    LoggerStream("pass - all parameters");
-                ResultStream(allResult + " (" + passCount + "/5)");
-            }
+                return suite.APSclient.GetTimeSeriesRawData(query._dataId, query._publishView, query._queryFromTime, query._queryToTime, query._changesSinceTime, query._asAtTime);
+            };
         }
     }
 
     public class GetTimeSeriesDataFromTimeToTimeTest : GetTimeSeriesDataTest
     {
         public GetTimeSeriesDataFromTimeToTimeTest(string name, TestSuite suite, string FromTime, string ToTime)
-            : base(name, suite)
+            : base(name, suite, csv2)
         {
-            //fromTime = FromTime;
-            //toTime = ToTime;
-
+            fromTime = FromTime;
+            toTime = ToTime;
         }
-        public override void RunTest()
-        {
-            base.RunTest();
-            GetTimeSeriesData_FromTimeToTime_test(fromTime, toTime, 0); //ToDo: fix this method again to be suitable for polymorphism
-        }
-        private void GetTimeSeriesData_FromTimeToTime_test(string fromTime, string toTime, int type)
-        {
-            System.Diagnostics.Trace.WriteLine("Get TS data fromTime toTime, type {0}: ", type.ToString());
-            LoggerStream(String.Format("GetTimeSeriesData(fromTime, toTime), type {0}: ", type.ToString())); //Semantic change
 
+        protected override void initializeTimeSeries()
+        {
+            initSuite();
+            appendData(Encoding.ASCII.GetBytes(_appendData));
+        }
+
+        protected override void RunGetTimeSeriesDataTest()
+        {
             LocationDTO locationInfo = Suite.AASclient.GetLocation(Suite.tsLocID);
             String locTimezoneOffset = String.Format("{0:+00;-00;+00}:00", locationInfo.UtcOffset);
             try
@@ -1012,7 +976,7 @@ namespace Tests
                     locTimezoneOffset = String.Format("{0:+00;-00;+00}:00", locationInfo.UtcOffset);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 System.Diagnostics.Trace.WriteLine("Unable to retrieve location information - test failed. Exception: {0}", e.Message);
                 LoggerStream(String.Format("Unable to retrieve location information - test failed. Exception: {0}", e.Message));
@@ -1020,20 +984,33 @@ namespace Tests
                 return;
             }
 
-            fromTime = String.Format("{0}{1}", "2010-07-31T01:15:00.000", locTimezoneOffset);
-            toTime = String.Format("{0}{1}", "2010-07-31T01:25:00.000", locTimezoneOffset);
-            
-            initSuite();
-            appendData(ptArray2); //Possibly could change
+            if (fromTime == string.Empty)
+            {
+                fromTime = String.Format("{0}{1}", "2010-07-31T01:15:00.000", locTimezoneOffset);
+            }
+
+            if (toTime == string.Empty)
+            {
+                toTime = String.Format("{0}{1}", "2010-07-31T01:25:00.000", locTimezoneOffset);
+            }
+
+            RunGetTimeSeriesDataTest(fromTime, toTime, 0);
+        }       
+        
+        protected void RunGetTimeSeriesDataTest(string fromTime, string toTime, int type)
+        {
+            System.Diagnostics.Trace.WriteLine("Get TS data fromTime toTime, type {0}: ", type.ToString());
+            LoggerStream(String.Format("GetTimeSeriesData(fromTime, toTime), type {0}: ", type.ToString())); //Semantic change
+
+            initializeTimeSeries();
 
             try
             {
                 string input = string.Empty;
-                using (TestSuite.NewContextScope(Suite.APSclient.InnerChannel))
-                {
-                    input = Suite.APSclient.GetTimeSeriesData(@"HG " + Suite.tsLabel + "@" + Suite.tsLoc, "Public", fromTime, toTime, null, null); //Stays the same
-                    LoggerStream("Method Output: " + input);
-                }
+                GetTimeSeriesDataQuery query = getQuery(null);
+                query._queryFromTime = fromTime;
+                input = getTimeSeriesData(query);
+
                 switch (type)
                 {
                     case 0:
@@ -1069,130 +1046,36 @@ namespace Tests
 
         }
 
-        protected override void evaluateSuccess(string[] actual, string[] expected)
-        {
-            int passCount = 0;
-            bool lengthPass = true;
-            bool[] result = new bool[5];
-            string allResult = "";
-
-            if (expected.Length != actual.Length)
-            {
-                ResultStream("FAIL");
-                lengthPass = false;
-                LoggerStream(string.Format("FAIL - Returned {0} points, expected {1} points", actual.Length, expected.Length));
-            }
-            else
-            {
-                int cInd = 0;
-                for (int i = 0; i < expected.Length; i++)
-                {
-                    cInd = i % 5;
-                    switch (cInd)
-                    {
-                        case 0:
-                            System.Diagnostics.Trace.WriteLine("Date: " + actual[i]);
-                            if (expected[i] == actual[i])
-                                result[0] = true;
-                            else
-                            {
-                                result[0] = false;
-                                LoggerStream(string.Format("- Date Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                            }
-                            break;
-                        case 1:
-                            System.Diagnostics.Trace.WriteLine("Value: " + actual[i]);
-                            double e = Convert.ToDouble(expected[i]);
-                            double a = Convert.ToDouble(actual[i]);
-                            if (e.ToString("#0.000") == a.ToString("#0.000"))
-                                result[1] = true;
-                            else
-                            {
-                                result[1] = false;
-                                LoggerStream(string.Format("- Value Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                            }
-                            break;
-                        case 2:
-                            System.Diagnostics.Trace.WriteLine("Quality: " + actual[i]);
-                            if (expected[i] == actual[i])
-                                result[2] = true;
-                            else
-                            {
-                                result[2] = false;
-                                LoggerStream(string.Format("- Quality Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                            }
-                            break;
-                        case 3:
-                            System.Diagnostics.Trace.WriteLine("Interpolation: " + actual[i]);
-                            if (expected[i] == actual[i])
-                                result[3] = true;
-                            else
-                            {
-                                result[3] = false;
-                                LoggerStream(string.Format("- Interpolation Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                            }
-                            break;
-                        case 4:
-                            System.Diagnostics.Trace.WriteLine("Approval: " + actual[i]);
-                            if (expected[i] == actual[i])
-                                result[4] = true;
-                            else
-                            {
-                                result[4] = false;
-                                LoggerStream(string.Format("- Approval Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                            }
-                            break;
-                    }
-                }
-            }
-            if (lengthPass)
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    if (result[i])
-                    {
-                        allResult += "p";
-                        passCount++;
-                    }
-                    else
-                    {
-                        allResult += "F";
-                    }
-                }
-                if (passCount == 5)
-                    LoggerStream("pass - all parameters");
-                ResultStream(allResult + " (" + passCount + "/5)");
-            }
-        }
-
-        private string fromTime;
-        private string toTime;
+        public string fromTime{ get; set; }
+        public string toTime{ get; set; }
     }
 
     public class GetTimeSeriesDataAsAtTimeTest : GetTimeSeriesDataTest
     {
         public GetTimeSeriesDataAsAtTimeTest(string name, TestSuite suite, string AsWhen, int Type)
-            : base(name, suite)
+            : base(name, suite, csv2)
         {
             asWhen = AsWhen;
             type = Type;
         }
-        public override void RunTest()
-        {
-            base.RunTest();
-            GetTimeSeriesData_asAtTime_test();
-        }
+
         private string asWhen;
         private int type;
-        protected void GetTimeSeriesData_asAtTime_test()
+
+        public override void initializeTimeSeries(string appendDataString)
+        {
+            initSuite();
+            appendData(Encoding.ASCII.GetBytes(appendDataString));
+        }
+
+        protected override void RunGetTimeSeriesDataTest()
         {
             try
             {
                 System.Diagnostics.Trace.WriteLine(String.Format("Get TS data AS OF {0}, type {1}", asWhen, type)); //same
                 Suite.writeLog.Append(String.Format("GetTimeSeriesData(asAtTime): Time: {0} Type: {1}", asWhen, type));
 
-                initSuite();
-                appendData(ptArray2); //may change in future
+                initializeTimeSeries();
 
                 string asAt = String.Empty;
                 string input = String.Empty;
@@ -1230,13 +1113,13 @@ namespace Tests
     public class GetTimeSeriesDataChangesSinceTest : GetTimeSeriesDataTest
     {
         public GetTimeSeriesDataChangesSinceTest(string name, TestSuite suite, string FromWhen)
-            : base(name, suite)
+            : base(name, suite, csv2)
         {
             fromWhen = FromWhen;
         }
-        public override void RunTest()
+
+        protected override void RunGetTimeSeriesDataTest()
         {
-            base.RunTest();
             GetTimeSeriesData_changesSinceTime_test(fromWhen, 0);
         }
         /// <summary>
@@ -1248,23 +1131,18 @@ namespace Tests
         /// <param name="type"></param>
         private void GetTimeSeriesData_changesSinceTime_test(string date, int type)
         {
+            System.Diagnostics.Trace.WriteLine("Get TS data SINCE, type " + type.ToString() + ": ");
+            LoggerStream(Name + ", type: " + type.ToString() + ": ");
+            initializeTimeSeries();
+
+            string changesSince = getDate(date, type);
+            LoggerStream(String.Format("Changes since parameter: {0}", changesSince));
             try
             {
-                System.Diagnostics.Trace.WriteLine("Get TS data SINCE, type " + type.ToString() + ": ");
-                LoggerStream("GetTimeSeriesData(changesSinceTime), type: " + type.ToString() + ": ");
-
-                initSuite();
-                appendData(ptArray2);
-
-                string changesSince = getDate(date, type);
-
-                LoggerStream(String.Format("Changes since parameter: {0}", changesSince));
-
                 string input = string.Empty;
-                using (TestSuite.NewContextScope(Suite.APSclient.InnerChannel))
-                {
-                    input = Suite.APSclient.GetTimeSeriesData(@"HG " + Suite.tsLabel + "@" + Suite.tsLoc, "Public", null, null, changesSince, null);
-                }
+                GetTimeSeriesDataQuery query = getQuery(null);
+                query._changesSinceTime = changesSince;
+                input = getTimeSeriesData(query);
                 System.Diagnostics.Trace.WriteLine("From APS: " + input);
 
                 string[] actual = stringParse(input, 0);
@@ -1287,112 +1165,26 @@ namespace Tests
             }
 
         }
-        protected override void evaluateSuccess(string[] actual, string[] expected)
-        {
-            int passCount = 0;
-            bool[] result = new bool[5];
-            string allResult = "";
-
-            int cInd = 0;
-            for (int i = 0; i < expected.Length; i++)
-            {
-                cInd = i % 5;
-                switch (cInd)
-                {
-                    case 0:
-                        System.Diagnostics.Trace.WriteLine("Date: " + actual[i]);
-                        if (expected[i] == actual[i])
-                            result[0] = true;
-                        else
-                        {
-                            result[0] = false;
-                            LoggerStream(string.Format("- Date Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                        }
-                        break;
-                    case 1:
-                        System.Diagnostics.Trace.WriteLine("Value: " + actual[i]);
-
-                        double e = Convert.ToDouble(expected[i]);
-                        double a = Convert.ToDouble(actual[i]);
-                        if (e.ToString("#0.000") == a.ToString("#0.000"))
-                            result[1] = true;
-                        else
-                        {
-                            result[1] = false;
-                            LoggerStream(string.Format("- Value Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                        }
-                        break;
-                    case 2:
-                        System.Diagnostics.Trace.WriteLine("Quality: " + actual[i]);
-                        if (expected[i] == actual[i])
-                            result[2] = true;
-                        else
-                        {
-                            result[2] = false;
-                            LoggerStream(string.Format("- Quality Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                        }
-                        break;
-                    case 3:
-                        System.Diagnostics.Trace.WriteLine("Interpolation: " + actual[i]);
-                        if (expected[i] == actual[i])
-                            result[3] = true;
-                        else
-                        {
-                            result[3] = false;
-                            LoggerStream(string.Format("- Interpolation Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                        }
-                        break;
-                    case 4:
-                        System.Diagnostics.Trace.WriteLine("Approval: " + actual[i]);
-                        if (expected[i] == actual[i])
-                            result[4] = true;
-                        else
-                        {
-                            result[4] = false;
-                            LoggerStream(string.Format("- Approval Incorrect. Returned {0}, expected {1}", actual[i], expected[i]));
-                        }
-                        break;
-                }
-            }
-            for (int i = 0; i < 5; i++)
-            {
-                if (result[i])
-                {
-                    allResult += "p";
-                    passCount++;
-                }
-                else
-                {
-                    allResult += "F";
-                }
-            }
-
-            if (passCount == 5)
-                LoggerStream("pass - all parameters");
-            ResultStream(allResult + " (" + passCount + "/5)");
-        }
 
         private string fromWhen;
     }
-
 
     public class GetTimeSeriesDataCustomTest : GetTimeSeriesDataTest
     {
         /// <summary>
         /// Required params: string name, TestSuite Suite, int NumPtsExpected, string Data1. //// Optional params: string publishView, queryFromTime, queryToTime, changesSinceTime, asAtTime, Data2. //// If Data2 is specified, asAtTime will be ignored and the interim time between appends will be used.
         /// </summary>
-        public GetTimeSeriesDataCustomTest(string name, TestSuite suite, int numPointsExpected, string data, params string[] args)
-            : base(name, suite)
+        public GetTimeSeriesDataCustomTest(string name, TestSuite suite, int numPointsExpected, string data, string data2, params string[] args)
+            : base(name, suite, data)
         {
             NumPtsExpected = numPointsExpected;
             Data = data;
-            Data2 = null;
+            Data2 = data2;
             if (args.Length > 0) publishView = args[0];
             if (args.Length > 1) queryFromTime = args[1];
             if (args.Length > 2) queryToTime = args[2];
             if (args.Length > 3) changesSinceTime = args[3];
             if (args.Length > 4) asAtTime = args[4];
-            if (args.Length > 5) Data2 = args[5];
         }
 
         /// <summary>
@@ -1400,38 +1192,36 @@ namespace Tests
         /// </summary>
         /// <param name="dt"></param>
         /// <returns>0 if not, an integer with an index to the UTC if there</returns>
-        private int isDateTimeInUTC (string dt)
+        private int isDateTimeInUTC(string dt)
         {
             //return (dt.Substring(dt.Length-3,3).Equals(":"));
             string sPattern = "[-\\+]\\d{2}:\\d{2}";
-            int j=0;
-            while (System.Text.RegularExpressions.Regex.IsMatch(dt.Substring(j+1), sPattern) && j< dt.Length){
+            int j = 0;
+            while (System.Text.RegularExpressions.Regex.IsMatch(dt.Substring(j + 1), sPattern) && j < dt.Length)
+            {
                 j++;
             }
             return j;
         }
         private void convertToUTC(ref string dt)
-		{    if (!String.IsNullOrEmpty(dt) && !dt.EndsWith(addUTCOffset(Suite.locUTCOff_hrs)))
-			{
+        {
+            if (!String.IsNullOrEmpty(dt) && !dt.EndsWith(addUTCOffset(Suite.locUTCOff_hrs)))
+            {
                 int UTCPos = isDateTimeInUTC(dt);
-				if (UTCPos != 0)
-					dt = dt.Remove(UTCPos);
+                if (UTCPos != 0)
+                    dt = dt.Remove(UTCPos);
                 dt += addUTCOffset(Suite.locUTCOff_hrs);
 
-			}
-		}
-        public override void RunTest()
+            }
+        }
+        
+        protected override void  RunGetTimeSeriesDataTest()
         {
-            base.RunTest();
-
             convertToUTC(ref queryFromTime);
-
             convertToUTC(ref queryToTime);
-
             convertToUTC(ref changesSinceTime);
-
             convertToUTC(ref asAtTime);
-            
+
             try
             {
                 GetTimeSeriesDataCustomTest_test();
@@ -1451,6 +1241,23 @@ namespace Tests
             result += Math.Abs(UTC).ToString("#00") + ":00";
             return result;
         }
+        
+        protected override GetTimeSeriesDataQuery getQuery(string asAt)
+        {
+            GetTimeSeriesDataQuery query = base.getQuery(asAt);
+            query._publishView = publishView ?? "Public";
+            query._queryFromTime = queryFromTime;
+            query._queryToTime = queryToTime;
+            query._changesSinceTime = changesSinceTime;
+            query._asAtTime = asAt;
+            
+            return query;
+        }
+
+        protected GetTimeSeriesDataQuery getQuery()
+        {
+            return getQuery(asAtTime);
+        }
 
         public void GetTimeSeriesDataCustomTest_test()
         {
@@ -1462,7 +1269,7 @@ namespace Tests
 
             string input = "";
 
-            initSuite(Data);
+            initializeTimeSeries(Data);
 
             if (!String.IsNullOrEmpty(Data2))
             {
@@ -1470,10 +1277,8 @@ namespace Tests
                 asAtTime = halfTime.ToString(@"yyyy-MM-ddTHH:mm:ss.fff") + addUTCOffset(Suite.locUTCOff_hrs);
             }
 
-            using (TestSuite.NewContextScope(Suite.APSclient.InnerChannel))
-            {
-                input = Suite.APSclient.GetTimeSeriesData(@"HG " + Suite.tsLabel + "@" + Suite.tsLoc, publishView ?? "Public", queryFromTime, queryToTime, changesSinceTime, asAtTime);
-            }
+            GetTimeSeriesDataQuery query = getQuery();
+            input = getTimeSeriesData(query);
             System.Diagnostics.Trace.WriteLine("Input: " + input);
 
             string[] actual = stringParse(input, 4);
@@ -1492,16 +1297,14 @@ namespace Tests
             }
         }
 
-        protected void initSuite(string data)
+        public override void initializeTimeSeries(string appendDataString)
         {
             // some tests require time-stamps, other don't. The ones that do use this method, others don't.
             createTS = createNewTS();
             createTime = Suite.ADSclient.GetCurrentServerTime();// DateTime.Now;      // changesSince = full TS
             createTime = createTime.AddHours(Suite.locUTCOff_hrs - Suite.servUTCOff_hrs); // Sets createTime to the location's timezone
 
-
-
-            append = appendData(Encoding.ASCII.GetBytes(data));
+            append = appendData(Encoding.ASCII.GetBytes(appendDataString));
 
             Thread.Sleep(2000);
 
@@ -1853,7 +1656,7 @@ namespace Tests
             {
                 ResultStream("Threw Exception");
                 LoggerStream("Exception Message: " + e.Message);
-            } 
+            }
             LoggerStream(" - UndoAppend returned: " + numPoints + " unappended");
         }
     }
