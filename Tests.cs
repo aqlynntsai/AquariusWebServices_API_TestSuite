@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using System.Collections;
+using System.Collections.Generic;
 
 using API_TestSuite_GUI;
 using API_TestSuite_GUI.AASreference;
@@ -231,25 +231,63 @@ namespace Tests
                 return -1;
             }
         }
+
+        public struct TimeSeriesParameters
+        {
+            public long _parentId;
+            public string _label;
+            public string _comments;
+            public string _description;
+            public string _parameter;
+            public int _utcOffsetInMin;
+            public string _unit;
+            public double _maxGaps;
+
+            public TimeSeriesParameters(long parentId, string label, string comments, string description, string parameter, int utcOffsetInMinutes, string unit, double maxGaps)
+            {
+                _parentId = parentId;
+                _label = label;
+                _comments = comments;
+                _description = description;
+                _parameter = parameter;
+                _utcOffsetInMin = utcOffsetInMinutes;
+                _unit = unit;
+                _maxGaps = maxGaps;
+            }
+        }
+
+        protected TimeSeriesParameters createDefaultTimeSeriesCreationParameters()
+        {
+            TimeSeriesParameters parameters = new TimeSeriesParameters();
+            parameters._parameter = "HG";
+            parameters._label = "JoshAPItest";
+            parameters._comments = "JoshAPItest -> done via createTS2";
+            parameters._description = "JoshAPItest description";
+            parameters._utcOffsetInMin = (int)(Suite.locUTCOff_hrs * 60);
+            parameters._unit = "m";
+            parameters._maxGaps = 0.0;
+            parameters._parentId = deleteSuiteTS();
+
+            return parameters;
+        }
+
+
         protected long createNewTS2()
         {
-            long val = 0;
-            string parameter = "HG";
-            string label = "JoshAPItest";
-            string comments = "JoshAPItest -> done via createTS2";
-            string description = "JoshAPItest description";
-            int utcOffsetInMin = (int)(Suite.locUTCOff_hrs * 60);
-            string unit = "m";
-            double maxGaps = 0.0;
-            long parentID = deleteSuiteTS();
+            TimeSeriesParameters parameters = createDefaultTimeSeriesCreationParameters();
+            return createNewTS2(parameters);
+        }
 
+        protected long createNewTS2(TimeSeriesParameters parameters)
+        {
+            long val = 0;
             try
             {
-                if (parentID >= 0)
+                if (parameters._parentId >= 0)
                 {
                     using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
                     {
-                        val = Suite.AASclient.CreateTimeSeries2(parentID, label, comments, description, parameter, utcOffsetInMin, unit, maxGaps);
+                        val = Suite.AASclient.CreateTimeSeries2(parameters._parentId, parameters._label, parameters._comments, parameters._description, parameters._parameter, parameters._utcOffsetInMin, parameters._unit, parameters._maxGaps);
                     }
                     System.Diagnostics.Trace.WriteLine("New TS Created!");
                 }
@@ -263,6 +301,12 @@ namespace Tests
                 return -1;
             }
         }
+
+        protected int appendData(string appendDataString)
+        {
+            return appendData(Encoding.ASCII.GetBytes(appendDataString));
+        }
+
         protected int appendData(byte[] data)
         {
             int val = 0;
@@ -569,9 +613,6 @@ namespace Tests
                 ResultStream("Threw Exception");
                 LoggerStream("Exception Message: " + e.Message);
             }
-
-
-
         }
     }
     public partial class GetDataSetsListChangesSinceTimeTest : PublishTestMethod
@@ -905,35 +946,27 @@ namespace Tests
 
     public class GetTimeSeriesDataResampledTest : GetTimeSeriesDataChangesSinceTest
     {
+        protected static string csv1WithIntermediatePoints =
+                                        @"2010-07-31 01:02:50,4.89599990844727,192,10,1,3
+                                          2010-07-31 01:07:50,4.89499998092651,192,10,1,3
+                                         ";
+
         public GetTimeSeriesDataResampledTest(string name, TestSuite suite, string anchorTime)
             : base(name, suite, anchorTime)
         {
 
             _queryAPI = delegate(GetTimeSeriesDataQuery query)
                 {
-                    return suite.APSclient.GetTimeSeriesDataResampled(query._dataId, query._publishView, query._queryFromTime, query._queryToTime, 10, query._changesSinceTime);
+                    return suite.APSclient.GetTimeSeriesDataResampled(query._dataId, query._publishView, query._queryFromTime, query._queryToTime, 5, query._changesSinceTime);
                 };
-            _appendData = csv1 + csv2;
         }
 
-        //private void GetTimeSeriesDataResampledTest()
-        //{
-        //    System.Diagnostics.Trace.WriteLine("Get TS data ALL");
-        //    initializeTimeSeries();
-
-        //    try
-        //    {
-        //        string input = string.Empty;
-        //        GetTimeSeriesDataQuery query = getQuery(null);
-        //        input = getTimeSeriesData(query);
-        //        evaluateSuccess(stringParse(input, 0), stringParse(csv1 + csv2, 1));
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        ResultStream("Threw Exception");
-        //        LoggerStream("Exception Message: " + e.Message);
-        //    }
-        //}
+        protected override void initializeTimeSeries()
+        {
+            base._appendData = csv1;
+            base.initializeTimeSeries();
+            appendData(csv1WithIntermediatePoints);
+        }
     }
 
     public class GetTimeSeriesRawDataAllTest : GetTimeSeriesDataAllTest
@@ -946,6 +979,17 @@ namespace Tests
             {
                 return suite.APSclient.GetTimeSeriesRawData(query._dataId, query._publishView, query._queryFromTime, query._queryToTime, query._changesSinceTime, query._asAtTime);
             };
+        }
+
+        public override void initializeTimeSeries(string appendDataString)
+        {
+            System.Diagnostics.Trace.WriteLine(Name);
+            LoggerStream(Name);
+            TimeSeriesParameters parameters = createDefaultTimeSeriesCreationParameters();
+            parameters._maxGaps = 1;
+
+            createTS = createNewTS2(parameters);
+            appendData(Encoding.ASCII.GetBytes(appendDataString));
         }
     }
 
@@ -1146,7 +1190,7 @@ namespace Tests
                 System.Diagnostics.Trace.WriteLine("From APS: " + input);
 
                 string[] actual = stringParse(input, 0);
-                string[] expected = getExpected(type);
+                string[] expected = stringParse(_appendData,1);
 
                 if (expected.Length != actual.Length)
                 {
@@ -1689,7 +1733,237 @@ namespace Tests
             }
         }
     }
-    public partial class AddUpdateDeleteLocationTest : AcquisitionTestMethod
+
+    public class GetLocationsByFolderIdTest : GetLocationTest
+    {
+        public GetLocationsByFolderIdTest(string name, TestSuite suite) : base(name, suite) { }
+        public override void RunTest()
+        {
+            base.RunTest();
+            GetLocationsByFolderId_test();
+        }
+
+        private void GetLocationsByFolderId_test()
+        {
+            try
+            {
+                long locationId = base.RunGetLocationTest();
+                string folderFilter = Suite.ADSclient.GetLocationFolders();
+                string[] deliminators = new string[] { " ", "<", ">" };
+                string[] seperatedFolderFilters = folderFilter.Split(deliminators, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string filter in seperatedFolderFilters)
+                {
+                    string key = "LocationFolderID=";
+                    if(filter.StartsWith(key))
+                    {
+                        string id = filter.Substring(key.Length);
+                        char[] trimCharacters = new char[] {'\"', '\\'};
+                        id = id.Trim(trimCharacters);
+
+                        using (TestSuite.NewContextScope(Suite.APSclient.InnerChannel))
+                        {
+                            string locations = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), null);
+                        }
+                    }
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    public class GetLocationTest : AcquisitionTestMethod
+    {
+        public GetLocationTest(string name, TestSuite suite) : base(name, suite) {}
+        public override void RunTest()
+        {
+            base.RunTest();
+            GetLocation_test();
+        }
+
+        protected void GetLocation_test()
+        {
+            try
+            {
+                RunGetLocationTest();
+
+                ResultStream("pass");
+                LoggerStream("Pass. Location created:" + _location.LocationName);
+            }
+            catch (Exception ex)
+            {
+                ResultStream("Threw Exception");
+                LoggerStream("Threw Exception: " + ex.ToString());
+            }
+        }
+
+        protected bool LocationExists(string locationName)
+        {
+            return false;
+        }
+
+        protected void getLocationTable()
+        {
+            LocationDTO[] locations;
+            locations = Suite.AASclient.GetAllLocations();
+            foreach (LocationDTO location in locations)
+            {
+                _locationTableDictionary.Add(location.LocationTypeName, location.ExtendedAttributes);
+            }
+        }
+
+        protected long createLocation(string identifier, string locationName)
+        {
+            LocationDTO existingLocation = Suite.AASclient.GetLocation(Suite.tsLocID);
+            existingLocation.Identifier = identifier;
+            existingLocation.LocationName = locationName;
+            existingLocation.LocationPath = "All Locations";
+
+            long locId = -1;
+
+            try
+            {
+                using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
+                {
+                    locId = Suite.AASclient.CreateLocation(existingLocation);
+                }
+
+                if (locId < 0)
+                {
+                    throw new Exception("CreateLocation returned invalid locationId");
+                }
+
+                _location = existingLocation;
+                _location.LocationId = locId;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return locId;
+        }
+
+        public long RunGetLocationTest()
+        {
+            string identifier = "Test Suite Location " + DateTime.Now.ToString();
+            string locName = "Acquisition's Location For CreateLocation_Test";
+
+            try
+            {
+                long locationId = createLocation(identifier, locName);
+                LocationDTO returnedLocation = GetLocation(locationId);
+                AssertLocationsAreSame(_location, returnedLocation);
+
+                return locationId;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public long RunGetAllLocationsTest(string identifier, string locationName)
+        {
+            try
+            {
+                long locId = -1;
+                getLocationTable();
+                if (_locationTableDictionary.Count == 0)
+                {
+                    ResultStream("SKIP");
+                    LoggerStream("No Locations stored on server. Unable to query existing location types.");
+                    return -1;
+                }
+
+                _location = new LocationDTO();
+                _location.Identifier = identifier;
+                _location.LocationName = locationName;
+
+                foreach (KeyValuePair<string, object> pair in _locationTableDictionary)
+                {
+                    _location.LocationTypeName = pair.Key;
+                    _location.ExtendedAttributes = (Dictionary<string, object>)pair.Value;
+                    try
+                    {
+                        using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
+                        {
+                            locId = Suite.AASclient.CreateLocation(_location);
+                        }
+
+                        if (locId > 0)
+                        {
+                            break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                }
+
+                LocationDTO locationReturned = GetLocation(locId);
+                AssertLocationsAreSame(_location, locationReturned);
+
+                return locId;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        protected LocationDTO GetLocation(long locationId)
+        {
+            LocationDTO locationReturned = null;
+            using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
+            {
+                locationReturned = Suite.AASclient.GetLocation(locationId);
+            }
+            if (locationId != locationReturned.LocationId)
+            {
+                throw new Exception("GetLocaion(long LocationId) returned a LocationDTO with mismatched locationId");
+            }
+            return locationReturned;
+        }
+
+        public void AssertLocationsAreSame(LocationDTO newLoc, LocationDTO locRet)
+        {
+            if(!LocationsAreSame(newLoc, locRet))
+            {
+                ResultStream("FAIL");
+                LoggerStream("Some values retrieved from the database did not match. Location identifier=: " + newLoc.Identifier);
+                Suite.ADSclient.SaveLocation(new Location() 
+                    { 
+                        AQDataID = newLoc.LocationId.Value, 
+                        IsDeleted = true 
+                    }
+                );
+           }
+        }
+
+        protected bool LocationsAreSame(LocationDTO newLoc, LocationDTO locRet)
+        {
+            return (newLoc.Identifier == locRet.Identifier) &&
+            (newLoc.Latitude == locRet.Latitude) &&
+            (newLoc.Longitude == locRet.Longitude) &&
+            (newLoc.LocationTypeName.ToUpper() == locRet.LocationTypeName.ToUpper()) &&
+            (newLoc.LocationId == locRet.LocationId) &&
+            (newLoc.LocationName == locRet.LocationName) &&
+            (newLoc.LocationPath == locRet.LocationPath) &&
+            (newLoc.UtcOffset == locRet.UtcOffset) &&
+            (newLoc.ExtendedAttributes != null && locRet.ExtendedAttributes != null ?
+               newLoc.ExtendedAttributes.Count == locRet.ExtendedAttributes.Count : true);
+        }
+
+        protected LocationDTO _location = null;
+        protected Dictionary<string, object> _locationTableDictionary = new Dictionary<string, object>();
+    }
+
+    public partial class AddUpdateDeleteLocationTest : GetLocationTest
     {
         public AddUpdateDeleteLocationTest(string name, TestSuite suite) : base(name, suite) { }
         public override void RunTest()
@@ -1702,46 +1976,25 @@ namespace Tests
             System.Diagnostics.Trace.WriteLine("Add/Update/Delete location test");
             Suite.writeLog.Append("AddUpdateDeleteLocation: ");
 
-            //Create:
             string identifier = "Test Suite Location " + DateTime.Now.ToString();
-            string locName = "Acquisition's Location For CreateLocation_Test";
+            string locName = "Acquisition's Location For AddUpdateDeleteLocationTest";
+            
             try
             {
-                LocationDTO newLoc = Suite.CreateLocationDTO(identifier, locName);
-                long locId = -1;
-                using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
-                {
-                    locId = Suite.AASclient.CreateLocation(newLoc);
-                }
-
-                //Get:
-                LocationDTO locRet = null;
-                using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
-                {
-                    locRet = Suite.AASclient.GetLocation(locId);
-                }
-                if (!AssertLocationsAreSame(newLoc, locId, locRet))
-                {
-                    ResultStream("FAIL");
-                    LoggerStream("Some values retrieved from the database did not match. Location identifier=: " + identifier);
-                    Suite.ADSclient.SaveLocation(new Location() { AQDataID = locId, IsDeleted = true });
-                    return;
-                }
-
+                //Create and Get:
+                long locId = base.RunGetLocationTest();
                 //Modify:
-                string newLocName = "Modified:" + locName;
-                LocationDTO modLoc = locRet;
-                modLoc.LocationName = newLocName;
+                LocationDTO modLoc = _location;
+                modLoc.Identifier = identifier;
+                modLoc.LocationName = locName;
+
                 using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
                 {
                     Suite.AASclient.ModifyLocation(modLoc);
                 }
-                LocationDTO locRetAfterMod = null;
-                using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
-                {
-                    locRetAfterMod = Suite.AASclient.GetLocation(modLoc.LocationId.Value);
-                }
-                if (!AssertLocationsAreSame(modLoc, locId, locRetAfterMod))
+
+                LocationDTO locRetAfterMod = GetLocation(locId);
+                if (!LocationsAreSame(modLoc, locRetAfterMod))
                 {
                     ResultStream("FAIL");
                     LoggerStream("Some modified values were not saved. Location identifier=: " + identifier);
@@ -1772,20 +2025,6 @@ namespace Tests
                 ResultStream("Threw Exception");
                 LoggerStream("Threw Exception: " + ex.ToString());
             }
-        }
-
-        private static bool AssertLocationsAreSame(LocationDTO newLoc, long locId, LocationDTO locRet)
-        {
-            return (newLoc.Identifier == locRet.Identifier) &&
-              (newLoc.Latitude == locRet.Latitude) &&
-              (newLoc.Longitude == locRet.Longitude) &&
-            (newLoc.LocationTypeName.ToUpper() == locRet.LocationTypeName.ToUpper()) &&
-             (locId == locRet.LocationId) &&
-            (newLoc.LocationName == locRet.LocationName) &&
-            (newLoc.LocationPath == locRet.LocationPath) &&
-            (newLoc.UtcOffset == locRet.UtcOffset) &&
-            (newLoc.ExtendedAttributes != null && locRet.ExtendedAttributes != null ?
-               newLoc.ExtendedAttributes.Count == locRet.ExtendedAttributes.Count : true);
         }
     }
     #endregion
