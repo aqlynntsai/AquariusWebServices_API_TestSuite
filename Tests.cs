@@ -470,9 +470,6 @@ namespace Tests
                 ResultStream("Threw Exception");
                 LoggerStream("Exception Message: " + e.Message);
             }
-
-
-
         }
     }
     public partial class GetGradeListTest : PublishTestMethod
@@ -506,10 +503,7 @@ namespace Tests
                 ResultStream("Threw Exception");
                 LoggerStream("Exception Message: " + e.Message);
             }
-
-
-
-        }
+      }
     }
     public partial class GetApprovalListTest : PublishTestMethod
     {
@@ -578,11 +572,9 @@ namespace Tests
                 ResultStream("Threw Exception");
                 LoggerStream("Exception Message: " + e.Message);
             }
-
-
-
         }
     }
+
     public partial class GetDataSetsListAllTest : PublishTestMethod
     {
         public GetDataSetsListAllTest(string name, TestSuite suite) : base(name, suite) { }
@@ -1812,6 +1804,15 @@ namespace Tests
             _locationIdList.Clear();
         }
 
+        public long createLocation()
+        {
+            Thread.Sleep(1000);
+            string identifier = "Test Suite Location " + DateTime.Now.ToString();
+            string locName = "Test Location For " + base.Name;
+
+            return createLocation(identifier, locName);
+        }
+
         protected long createLocation(string identifier, string locationName)
         {
             LocationDTO existingLocation = Suite.AASclient.GetLocation(Suite.tsLocID);
@@ -1850,7 +1851,7 @@ namespace Tests
         {
             Thread.Sleep(1000);
             string identifier = "Test Suite Location " + DateTime.Now.ToString();
-            string locName = "Acquisition's Location For CreateLocation_Test";
+            string locName = "Test Location For " + base.Name;
 
             try
             {
@@ -1866,7 +1867,7 @@ namespace Tests
             }
         }
 
-        protected LocationDTO GetLocation(long locationId)
+        protected virtual LocationDTO GetLocation(long locationId)
         {
             LocationDTO locationReturned = null;
             using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
@@ -1911,6 +1912,29 @@ namespace Tests
 
         protected LocationDTO _location = null;
         protected List<long> _locationIdList = new List<long>();
+    }
+
+    public class GetLocationsTest : GetLocationTest
+    {
+        public GetLocationsTest(string name, TestSuite suite) : base(name, suite) { }
+        public override void RunTest()
+        {
+            base.RunTest();
+            GetLocations_test();
+        }
+      
+        protected void GetLocations_test()
+        {
+            long locationID = base.createLocation();
+
+            string filterString = "IDENTIFIER=" + _location.Identifier;
+            string locationData = string.Empty;
+
+            using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
+            {
+                locationData = Suite.APSclient.GetLocations(filterString);
+            }
+        }
     }
     
     public class GetLocationsByFolderIdTest : GetLocationTest
