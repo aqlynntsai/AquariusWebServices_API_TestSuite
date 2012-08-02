@@ -18,16 +18,16 @@
     <ServiceContractMappings />
   </ClientOptions>
   <MetadataSources>
-    <MetadataSource Address="http://chilko/aquarius/AQAcquisitionService.svc" Protocol="http" SourceId="1" />
+    <MetadataSource Address="http://sooke/aquarius/AQAcquisitionService.svc" Protocol="http" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="AQAcquisitionService1.disco" MetadataType="Disco" ID="f1a9a1d4-7bb3-4fef-af61-1f38a53ade45" SourceId="1" SourceUrl="http://chilko.ai.local/AQUARIUS/AQAcquisitionService.svc?disco" />
-    <MetadataFile FileName="AQAcquisitionService1.wsdl" MetadataType="Wsdl" ID="52a71f3d-5361-4206-81bf-b68a7c57c1de" SourceId="1" SourceUrl="http://chilko.ai.local/AQUARIUS/AQAcquisitionService.svc?wsdl" />
-    <MetadataFile FileName="AQAcquisitionService4.xsd" MetadataType="Schema" ID="3a3496b0-c453-41b4-829a-0aa8db7411ef" SourceId="1" SourceUrl="http://chilko.ai.local/AQUARIUS/AQAcquisitionService.svc?xsd=xsd0" />
-    <MetadataFile FileName="AQAcquisitionService41.xsd" MetadataType="Schema" ID="1d37e26c-85ab-4aa2-bdbb-8f99c93018db" SourceId="1" SourceUrl="http://chilko.ai.local/AQUARIUS/AQAcquisitionService.svc?xsd=xsd1" />
-    <MetadataFile FileName="AQAcquisitionService42.xsd" MetadataType="Schema" ID="41f7fd0d-3f13-43ab-95ff-39c35549d97e" SourceId="1" SourceUrl="http://chilko.ai.local/AQUARIUS/AQAcquisitionService.svc?xsd=xsd2" />
-    <MetadataFile FileName="AQAcquisitionService43.xsd" MetadataType="Schema" ID="b2d721aa-bd3b-448f-99e4-1eb9568833b4" SourceId="1" SourceUrl="http://chilko.ai.local/AQUARIUS/AQAcquisitionService.svc?xsd=xsd3" />
-    <MetadataFile FileName="AQAcquisitionService44.xsd" MetadataType="Schema" ID="73492760-1300-42ac-acfc-9ceb4ed8f579" SourceId="1" SourceUrl="http://chilko.ai.local/AQUARIUS/AQAcquisitionService.svc?xsd=xsd4" />
+    <MetadataFile FileName="AQAcquisitionService.wsdl" MetadataType="Wsdl" ID="fb3b621d-c37f-473f-8d54-d4148415c8b8" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AQAcquisitionService.svc?wsdl" />
+    <MetadataFile FileName="AQAcquisitionService.xsd" MetadataType="Schema" ID="9067d286-1314-44b2-a4bb-7c1ef7be5cc6" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AQAcquisitionService.svc?xsd=xsd4" />
+    <MetadataFile FileName="AQAcquisitionService1.xsd" MetadataType="Schema" ID="70e26ef4-e659-46af-9836-5681e665c38a" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AQAcquisitionService.svc?xsd=xsd3" />
+    <MetadataFile FileName="AQAcquisitionService2.xsd" MetadataType="Schema" ID="f951d317-f0bd-4481-9ec9-87f41f5a3054" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AQAcquisitionService.svc?xsd=xsd2" />
+    <MetadataFile FileName="AQAcquisitionService3.xsd" MetadataType="Schema" ID="d9474177-45f5-487c-b446-66388ec598e6" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AQAcquisitionService.svc?xsd=xsd1" />
+    <MetadataFile FileName="AQAcquisitionService.disco" MetadataType="Disco" ID="90ca69c2-151c-4a8e-a95f-b74a2fc2c8d1" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AQAcquisitionService.svc?disco" />
+    <MetadataFile FileName="AQAcquisitionService4.xsd" MetadataType="Schema" ID="34e6981a-c961-4a64-8830-369a6ec24848" SourceId="1" SourceUrl="http://sooke/AQUARIUS/AQAcquisitionService.svc?xsd=xsd0" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

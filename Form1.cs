@@ -224,7 +224,9 @@ namespace API_TestSuite_GUI
                 new AppendAndMergeTest("Append and Merge", this),
                 new UndoAppendTest("Undo Append", this),
                 new DeleteTimeSeriesTest("Delete Time Series", this),
-                new AddUpdateDeleteLocationTest("Add Update Delete Location", this) 
+                new AddUpdateDeleteLocationTest("Add Update Delete Location", this),
+                new GetLocationsByFolderIdTest("Get Location By FolderId", this),
+                new GetLocationTest("Get Location", this),
             };
 
             PublishTestList = new PublishTestMethod[]
@@ -243,13 +245,15 @@ namespace API_TestSuite_GUI
                 new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 1", this, 2, csv1+csv2, null, "2010-07-31T01:00:00.000", "2010-07-31T01:05:00.000", "2000-01-01T00:00:00.000", null),
                 new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 2", this, 6, csv1+csv2, null, null, null, null, null),
                 new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 3", this, 6, csv1+csv2, null, null, null, null, "1900-01-01T00:00:00.000"), //This returns all points appended apparently...
-                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 4", this, 0, csv1+csv2, null, "2010-07-31T01:05:00.000", "2010-07-31T01:00:00.000"),
+                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 4", this, 0, csv1+csv2, null, null, "2010-07-31T01:05:00.000", "2010-07-31T01:00:00.000"),
                 // Note that Test 5 needs to be run within 30 minutes of starting the APITester
                 // and the ChangesSince field imprecisely (TODO) uses the time of the client, but the time zone of the server
-                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 5", this, 0, csv1+csv2, null, "2010-07-31T01:00:00.000", "2010-07-31T01:05:00.000", DateTime.Now.AddMinutes(30).ToString(@"yyyy-MM-ddTHH:mm:ss.fff")),
-                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 6", this, 3, csv1, null, null, null, null, null, csv2),
-                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 7", this, 1, csv1, null, "2010-07-31T01:10:00.000", null, null, null, csv2)
-            };
+                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 5", this, 0, csv1+csv2, null, null, "2010-07-31T01:00:00.000", "2010-07-31T01:05:00.000", DateTime.Now.AddMinutes(30).ToString(@"yyyy-MM-ddTHH:mm:ss.fff")),
+                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 6", this, 3, csv1, csv2, null, null, null, null, null),
+                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 7", this, 1, csv1, csv2, null, "2010-07-31T01:10:00.000", null, null, null),
+                new GetTimeSeriesRawDataAllTest("Get All Time Series Raw Data", this),
+                new GetTimeSeriesDataResampledTest("Get All Time Series Data Resampled", this, SinceWhen),
+           };
             int i = 0;
             AcquisitionTestNames = new string[AcquisitionTestList.Length];
             foreach (AcquisitionTestMethod atm in AcquisitionTestList)
@@ -322,9 +326,18 @@ namespace API_TestSuite_GUI
 
                     if (host.Contains(@"localhost"))
                     {
-                        aashost = @"http://localhost:6995/AQAcquisitionService.svc";
-                        adshost = @"http://localhost:6995/AquariusDataService.svc";
-                        apshost = @"http://localhost:2498/AquariusPublishService.svc";
+                        if (host.Contains(":8000"))
+                        {
+                            aashost = @"http://localhost:8000/AQUARIUS/AQAcquisitionService.svc";
+                            adshost = @"http://localhost:8000/AQUARIUS/AquariusDataService.svc";
+                            apshost = @"http://localhost:8000/AQUARIUS/AquariusPublishService.svc";
+                        }
+                        else
+                        {
+                            aashost = @"http://localhost:6995/AQAcquisitionService.svc";
+                            adshost = @"http://localhost:6995/AquariusDataService.svc";
+                            apshost = @"http://localhost:2498/AquariusPublishService.svc";
+                        }
                     }
                     else
                     {

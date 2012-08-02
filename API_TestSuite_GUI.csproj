@@ -174,9 +174,6 @@
     <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.GlobalSetting.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
-    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.HotFolderAvailability.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
     <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.HotFolderInfo.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
@@ -387,6 +384,36 @@
     <None Include="Service References\APSreference\AquariusPublishService3.xsd" />
     <None Include="Service References\APSreference\AquariusPublishService4.xsd" />
     <None Include="Service References\APSreference\AquariusPublishService5.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\AASreference\AQAcquisitionService55.xsd" />
+    <None Include="Service References\AASreference\AQAcquisitionService56.xsd" />
+    <None Include="Service References\AASreference\AQAcquisitionService57.xsd" />
+    <None Include="Service References\AASreference\AQAcquisitionService58.xsd" />
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.EventMonitorInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.HotFolderParser.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.RemoteLocation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.RemoteTimeSeriesMetadata.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\AASreference\AQAcquisitionService.wsdl" />
+    <None Include="Service References\AASreference\AQAcquisitionService.xsd" />
+    <None Include="Service References\AASreference\AQAcquisitionService1.xsd" />
+    <None Include="Service References\AASreference\AQAcquisitionService2.xsd" />
+    <None Include="Service References\AASreference\AQAcquisitionService3.xsd" />
+    <None Include="Service References\AASreference\AQAcquisitionService59.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\AASreference\AQAcquisitionService.disco" />
+    <None Include="Service References\AASreference\AQAcquisitionService4.xsd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<SavedWcfConfigurationInformation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="9.1" CheckSum="rNKwQGAH9d5ftAstNecJJupYhVA=">
+<SavedWcfConfigurationInformation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="9.1" CheckSum="TGtIfT9Y2HKIM0EMarEL5Ro9TZw=">
   <bindingConfigurations>
     <bindingConfiguration bindingType="basicHttpBinding" name="BasicHttpBinding_IAQAcquisitionService1">
       <properties>
@@ -110,10 +110,10 @@
         </property>
       </properties>
     </bindingConfiguration>
-    <bindingConfiguration bindingType="wsHttpBinding" name="WSHttpBinding_IAQAcquisitionService1">
+    <bindingConfiguration bindingType="wsHttpBinding" name="WSHttpBinding_IAQAcquisitionService">
       <properties>
         <property path="/name" isComplexType="false" isExplicitlyDefined="true" clrType="System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-          <serializedValue>WSHttpBinding_IAQAcquisitionService1</serializedValue>
+          <serializedValue>WSHttpBinding_IAQAcquisitionService</serializedValue>
         </property>
         <property path="/closeTimeout" isComplexType="false" isExplicitlyDefined="true" clrType="System.TimeSpan, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
           <serializedValue>00:01:00</serializedValue>
@@ -315,7 +315,7 @@
         </property>
       </properties>
     </endpoint>
-    <endpoint name="WSHttpBinding_IAQAcquisitionService1" contract="AASreference.IAQAcquisitionService" bindingType="wsHttpBinding" address="http://sooke/AQUARIUS/AQAcquisitionService.svc" bindingConfiguration="WSHttpBinding_IAQAcquisitionService1">
+    <endpoint name="WSHttpBinding_IAQAcquisitionService" contract="AASreference.IAQAcquisitionService" bindingType="wsHttpBinding" address="http://sooke/AQUARIUS/AQAcquisitionService.svc" bindingConfiguration="WSHttpBinding_IAQAcquisitionService">
       <properties>
         <property path="/address" isComplexType="false" isExplicitlyDefined="true" clrType="System.Uri, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
           <serializedValue>http://sooke/AQUARIUS/AQAcquisitionService.svc</serializedValue>
@@ -327,7 +327,7 @@
           <serializedValue>wsHttpBinding</serializedValue>
         </property>
         <property path="/bindingConfiguration" isComplexType="false" isExplicitlyDefined="true" clrType="System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-          <serializedValue>WSHttpBinding_IAQAcquisitionService1</serializedValue>
+          <serializedValue>WSHttpBinding_IAQAcquisitionService</serializedValue>
         </property>
         <property path="/contract" isComplexType="false" isExplicitlyDefined="true" clrType="System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
           <serializedValue>AASreference.IAQAcquisitionService</serializedValue>
@@ -390,7 +390,7 @@
           <serializedValue>False</serializedValue>
         </property>
         <property path="/name" isComplexType="false" isExplicitlyDefined="true" clrType="System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-          <serializedValue>WSHttpBinding_IAQAcquisitionService1</serializedValue>
+          <serializedValue>WSHttpBinding_IAQAcquisitionService</serializedValue>
         </property>
       </properties>
     </endpoint>
