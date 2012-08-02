@@ -1938,39 +1938,7 @@ namespace Tests
                 string[] seperatedFolderFilters = folderFilter.Split(deliminators, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string filter in seperatedFolderFilters)
                 {
-                    string key = "LocationFolderID=";
-                    if(filter.StartsWith(key))
-                    {
-                        string id = filter.Substring(key.Length);
-                        char[] trimCharacters = new char[] {'\"', '\\'};
-                        id = id.Trim(trimCharacters);
-
-                        using (TestSuite.NewContextScope(Suite.APSclient.InnerChannel))
-                        {
-                            string locations = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), null);
-                            string[] locationEntries = locations.Split('\n');
-                            if(!locationEntries[0].StartsWith(ExpectedHeader))
-                            {
-                                failureMessage += "unexpected hearders returned:" + locationEntries[0];
-                            }
-
-                            if (locationEntries.Length > 1)
-                            {
-                                string[] entryData = locationEntries[1].Split(',');
-                                if (entryData.Length < identifierIndex)
-                                {
-                                    continue;
-                                }
-
-                                string filterString = "IDENTIFIER=" + entryData[identifierIndex];
-                                string filteredLocation = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), filterString);
-                                if (filteredLocation.Split('\n').Length < 1)
-                                {
-                                    failureMessage += "Unable to filter by Identifier. Filter used: " + filterString;
-                                }
-                            }
-                        }
-                    }
+                    failureMessage += getLocationByIdentifier(filter);
                 }
 
                 if (failureMessage.Length > 0)
@@ -1990,6 +1958,47 @@ namespace Tests
                 ResultStream("Threw Exception");
                 LoggerStream("Threw Exception: " + ex.ToString());
             }
+        }
+
+        protected const string key = "LocationFolderID="; 
+        protected string getLocationByIdentifier(string filter)
+        {
+            string failureMessage = string.Empty;
+            
+            if (filter.StartsWith(key))
+            {
+                string id = filter.Substring(key.Length);
+                char[] trimCharacters = new char[] { '\"', '\\' };
+                id = id.Trim(trimCharacters);
+
+                using (TestSuite.NewContextScope(Suite.APSclient.InnerChannel))
+                {
+                    string locations = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), null);
+                    string[] locationEntries = locations.Split('\n');
+                    if (!locationEntries[0].StartsWith(ExpectedHeader))
+                    {
+                        failureMessage += "unexpected hearders returned:" + locationEntries[0];
+                    }
+
+                    if (locationEntries.Length > 1)
+                    {
+                        string[] entryData = locationEntries[1].Split(',');
+                        if (entryData.Length < identifierIndex)
+                        {
+                            return failureMessage;
+                        }
+
+                        string filterString = "IDENTIFIER=" + entryData[identifierIndex];
+                        string filteredLocation = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), filterString);
+                        if (filteredLocation.Split('\n').Length < 1)
+                        {
+                            failureMessage += "Unable to filter by Identifier. Filter used: " + filterString;
+                        }
+                    }
+                }
+            }
+
+            return failureMessage;
         }
     }
 
