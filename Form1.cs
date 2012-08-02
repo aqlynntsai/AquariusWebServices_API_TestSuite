@@ -225,8 +225,8 @@ namespace API_TestSuite_GUI
                 new UndoAppendTest("Undo Append", this),
                 new DeleteTimeSeriesTest("Delete Time Series", this),
                 new AddUpdateDeleteLocationTest("Add Update Delete Location", this),
-                new GetLocationsByFolderIdTest("GetLocationByFolderId", this),
-                new GetLocationTest("GetLocation", this),
+                new GetLocationsByFolderIdTest("Get Location By FolderId", this),
+                new GetLocationTest("Get Location", this),
             };
 
             PublishTestList = new PublishTestMethod[]
