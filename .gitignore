@@ -1,6 +1,6 @@
-*.datasource
-*.wsdl
-*.xsd
+*API_TestSuite*.datasource
+*API_TestSuite*.wsdl
+*API_TestSuite*.xsd
 Reference.cs
 #ignore thumbnails created by windows
 Thumbs.db
