@@ -226,6 +226,7 @@ namespace API_TestSuite_GUI
                 new DeleteTimeSeriesTest("Delete Time Series", this),
                 new AddUpdateDeleteLocationTest("Add Update Delete Location", this),
                 new GetLocationTest("Create and Get Location", this),
+                new GetAllLocationsTest("Get all existing locations", this),
             };
 
             PublishTestList = new PublishTestMethod[]

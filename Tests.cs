@@ -1963,6 +1963,36 @@ namespace Tests
             }
         }
     }
+    public class GetAllLocationsTest : AcquisitionTestMethod
+    {
+        public GetAllLocationsTest(string name, TestSuite suite)
+            : base(name, suite)
+        {
+        }
+
+        public override void RunTest()
+        {
+            base.RunTest();
+            GetAllLocationsTest_test();
+        }
+
+        public void GetAllLocationsTest_test()
+        {
+            try
+            {
+                using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
+                {
+                    LocationDTO[] allLocations = Suite.AASclient.GetAllLocations();
+                }
+            }
+            catch (Exception ex)
+            {
+                ResultStream("Threw Exception");
+                LoggerStream("Threw Exception: " + ex.ToString());
+            }
+            ResultStream("pass");
+        }
+    }
 
     public class GetLocationTest : AcquisitionTestMethod
     {
