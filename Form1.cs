@@ -225,8 +225,7 @@ namespace API_TestSuite_GUI
                 new UndoAppendTest("Undo Append", this),
                 new DeleteTimeSeriesTest("Delete Time Series", this),
                 new AddUpdateDeleteLocationTest("Add Update Delete Location", this),
-                new GetLocationsByFolderIdTest("Get Location By FolderId", this),
-                new GetLocationTest("Get Location", this),
+                new GetLocationTest("Create and Get Location", this),
             };
 
             PublishTestList = new PublishTestMethod[]
@@ -253,6 +252,8 @@ namespace API_TestSuite_GUI
                 new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 7", this, 1, csv1, csv2, null, "2010-07-31T01:10:00.000", null, null, null),
                 new GetTimeSeriesRawDataAllTest("Get All Time Series Raw Data", this),
                 new GetTimeSeriesDataResampledTest("Get All Time Series Data Resampled", this, SinceWhen),
+                new GetLocationsTest("Get Locations by a user specified query string", this),
+                new GetLocationsByFolderIdTest("Get Location By FolderId", this),
            };
             int i = 0;
             AcquisitionTestNames = new string[AcquisitionTestList.Length];

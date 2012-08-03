@@ -387,6 +387,82 @@ namespace Tests
         public bool IsChecked;
     }
 
+    public class LocationList
+    {
+        public LocationList(TestSuite caller)
+        {
+            _caller = caller;
+        }
+
+        ~LocationList()
+        {
+            cleanUpCreatedLocations();
+        }
+
+        public const string testLocationNamePrefix = "PublishAPI testSuite Location";
+        public LocationDTO createLocation()
+        {
+            string identifier = testLocationNamePrefix + " " + DateTime.Now.ToString();
+            string locName = testLocationNamePrefix + " For " + _caller.Name;
+
+            return createLocation(identifier, locName);
+        }
+
+        public LocationDTO createLocation(string identifier, string locationName)
+        {
+            Thread.Sleep(1000);
+            LocationDTO existingLocation = _caller.AASclient.GetLocation(_caller.tsLocID);
+            existingLocation.Identifier = identifier;
+            existingLocation.LocationName = locationName;
+            existingLocation.LocationPath = existingLocation.LocationPath.Split('.')[0];
+
+            long locId = -1;
+            cleanUpCreatedLocations();
+
+            try
+            {
+                using (TestSuite.NewContextScope(_caller.AASclient.InnerChannel))
+                {
+                    locId = _caller.AASclient.CreateLocation(existingLocation);
+                }
+
+                if (locId < 0)
+                {
+                    throw new Exception("CreateLocation returned invalid locationId");
+                }
+
+                existingLocation.LocationId = locId;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            _locationIdList.Add(locId);
+            return existingLocation;
+        }
+
+        protected void cleanUpCreatedLocations()
+        {
+            if (_locationIdList.Count > 0)
+            {
+                try
+                {
+                    _caller.ADSclient.DeleteLocationList(_locationIdList.ToArray(), true, "");
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+
+            _locationIdList.Clear();
+        }
+
+        protected List<long> _locationIdList = new List<long>();
+        protected TestSuite _caller;
+    }
+
     #region PublishTests
     public abstract class PublishTestMethod : TestMethod
     {
@@ -1379,6 +1455,142 @@ namespace Tests
         private string Data2;
         private string publishView, queryFromTime, queryToTime, changesSinceTime, asAtTime;
     }
+
+    public class GetLocationsTest : PublishTestMethod
+    {
+        protected const string ExpectedHeader =
+            @"LOCATIONID,LOCATIONFOLDERID,LASTMODIFIED,LOCATIONNAME,DESCRIPTION,IDENTIFIER,LOCATIONTYPEID,LATITUDE,LONGITUDE,SRID,ELEVATIONUNITS,ELEVATION,UTCOFFSET,TIMEZONE";
+
+        public GetLocationsTest(string name, TestSuite suite) : base(name, suite) { }
+        public override void RunTest()
+        {
+            base.RunTest();
+            GetLocations_test();
+        }
+
+        protected void RunBaseTest()
+        {
+            base.RunTest();
+        }
+
+        protected void GetLocations_test()
+        {
+            LocationList testLocations = new LocationList(Suite);
+            LocationDTO testLocationDTO = testLocations.createLocation();
+
+            List<string> filterStrings = new List<string>();
+            filterStrings.Add("IDENTIFIER=" + testLocationDTO.Identifier);
+            string locationData = string.Empty;
+            try
+            {
+                foreach (string filterString in filterStrings)
+                {
+                    using (TestSuite.NewContextScope(Suite.APSclient.InnerChannel))
+                    {
+                        locationData = Suite.APSclient.GetLocations(filterString);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ResultStream("Threw Exception");
+                LoggerStream("Threw Exception: " + ex.ToString());
+            }
+
+            ResultStream("Pass.");
+        }
+    }
+
+    public class GetLocationsByFolderIdTest : GetLocationsTest
+    {
+        protected const uint identifierIndex = 5;
+
+        public GetLocationsByFolderIdTest(string name, TestSuite suite) : base(name, suite) { }
+        public override void RunTest()
+        {
+            base.RunBaseTest();
+            GetLocationsByFolderId_test();
+        }
+
+        private void GetLocationsByFolderId_test()
+        {
+            string failureMessage = string.Empty;
+            LocationList testLocations = new LocationList(Suite);
+            LocationDTO testLocationDTO = testLocations.createLocation();
+
+            try
+            {
+                long locationId = (long)testLocationDTO.LocationId;
+
+                string folderFilter = Suite.ADSclient.GetLocationFolders();
+                string[] deliminators = new string[] { " ", "<", ">" };
+                string[] seperatedFolderFilters = folderFilter.Split(deliminators, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string filter in seperatedFolderFilters)
+                {
+                    failureMessage += getLocationByIdentifier(filter);
+                }
+
+                if (failureMessage.Length > 0)
+                {
+                    LoggerStream("GetLocationsByFolderId failed: " + failureMessage);
+                    ResultStream("FAIL");
+                }
+                else
+                {
+                    ResultStream("pass");
+                    LoggerStream("Pass. Location created:" + testLocationDTO.LocationName);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ResultStream("Threw Exception");
+                LoggerStream("Threw Exception: " + ex.ToString());
+            }
+        }
+
+        protected const string key = "LocationFolderID=";
+        protected string getLocationByIdentifier(string filter)
+        {
+            string failureMessage = string.Empty;
+
+            if (filter.StartsWith(key))
+            {
+                string id = filter.Substring(key.Length);
+                char[] trimCharacters = new char[] { '\"', '\\' };
+                id = id.Trim(trimCharacters);
+
+                using (TestSuite.NewContextScope(Suite.APSclient.InnerChannel))
+                {
+                    string locations = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), null);
+                    string[] locationEntries = locations.Split('\n');
+                    if (!locationEntries[0].StartsWith(ExpectedHeader))
+                    {
+                        failureMessage += "unexpected hearders returned:" + locationEntries[0];
+                    }
+
+                    if (locationEntries.Length > 1)
+                    {
+                        string[] entryData = locationEntries[1].Split(',');
+                        if (entryData.Length < identifierIndex)
+                        {
+                            return failureMessage;
+                        }
+
+                        string filterString = "IDENTIFIER=" + entryData[identifierIndex];
+                        string filteredLocation = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), filterString);
+                        if (filteredLocation.Split('\n').Length < 1)
+                        {
+                            failureMessage += "Unable to filter by Identifier. Filter used: " + filterString;
+                        }
+                    }
+                }
+            }
+
+            return failureMessage;
+        }
+    }
+
     #endregion
 
     #region AcquisitionTests
@@ -1754,14 +1966,17 @@ namespace Tests
 
     public class GetLocationTest : AcquisitionTestMethod
     {
-        public GetLocationTest(string name, TestSuite suite) : base(name, suite) {}
+        public GetLocationTest(string name, TestSuite suite) : base(name, suite)
+        {
+        }
+
         public override void RunTest()
         {
             base.RunTest();
             GetLocation_test();
         }
 
-        protected void RunBaseTest()
+        protected void runBaseTest()
         {
             base.RunTest();
         }
@@ -1771,9 +1986,7 @@ namespace Tests
             try
             {
                 RunGetLocationTest();
-
                 ResultStream("pass");
-                LoggerStream("Pass. Location created:" + _location.LocationName);
             }
             catch (Exception ex)
             {
@@ -1782,84 +1995,14 @@ namespace Tests
             }
         }
 
-        ~GetLocationTest()
+        public void RunGetLocationTest()
         {
-            cleanUpCreatedLocations();
-        }
-
-        protected void cleanUpCreatedLocations()
-        {
-            if (_locationIdList.Count > 0)
-            {
-                try
-                {
-                    Suite.ADSclient.DeleteLocationList(_locationIdList.ToArray(), true, "");
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-            }
-
-            _locationIdList.Clear();
-        }
-
-        public long createLocation()
-        {
-            Thread.Sleep(1000);
-            string identifier = "Test Suite Location " + DateTime.Now.ToString();
-            string locName = "Test Location For " + base.Name;
-
-            return createLocation(identifier, locName);
-        }
-
-        protected long createLocation(string identifier, string locationName)
-        {
-            LocationDTO existingLocation = Suite.AASclient.GetLocation(Suite.tsLocID);
-            existingLocation.Identifier = identifier;
-            existingLocation.LocationName = locationName;
-            existingLocation.LocationPath = existingLocation.LocationPath.Split('.')[0];
-
-            long locId = -1;
-            cleanUpCreatedLocations();
-
+            LocationList testLocations = new LocationList(Suite);
             try
             {
-                using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
-                {
-                    locId = Suite.AASclient.CreateLocation(existingLocation);
-                }
-
-                if (locId < 0)
-                {
-                    throw new Exception("CreateLocation returned invalid locationId");
-                }
-
-                _location = existingLocation;
-                _location.LocationId = locId;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            _locationIdList.Add(locId);
-            return locId;
-        }
-
-        public long RunGetLocationTest()
-        {
-            Thread.Sleep(1000);
-            string identifier = "Test Suite Location " + DateTime.Now.ToString();
-            string locName = "Test Location For " + base.Name;
-
-            try
-            {
-                long locationId = createLocation(identifier, locName);
-                LocationDTO returnedLocation = GetLocation(locationId);
-                AssertLocationsAreSame(_location, returnedLocation);
-
-                return locationId;
+                LocationDTO createdLocation = testLocations.createLocation();
+                LocationDTO returnedLocation = GetLocation((long)createdLocation.LocationId);
+                AssertLocationsAreSame(createdLocation, returnedLocation);
             }
             catch (Exception ex)
             {
@@ -1909,121 +2052,6 @@ namespace Tests
             (newLoc.ExtendedAttributes != null && locRet.ExtendedAttributes != null ?
                newLoc.ExtendedAttributes.Count == locRet.ExtendedAttributes.Count : true);
         }
-
-        protected LocationDTO _location = null;
-        protected List<long> _locationIdList = new List<long>();
-    }
-
-    public class GetLocationsTest : GetLocationTest
-    {
-        public GetLocationsTest(string name, TestSuite suite) : base(name, suite) { }
-        public override void RunTest()
-        {
-            base.RunTest();
-            GetLocations_test();
-        }
-      
-        protected void GetLocations_test()
-        {
-            long locationID = base.createLocation();
-
-            string filterString = "IDENTIFIER=" + _location.Identifier;
-            string locationData = string.Empty;
-
-            using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
-            {
-                locationData = Suite.APSclient.GetLocations(filterString);
-            }
-        }
-    }
-    
-    public class GetLocationsByFolderIdTest : GetLocationTest
-    {
-        protected const string ExpectedHeader =
-            @"LOCATIONID,LOCATIONFOLDERID,LASTMODIFIED,LOCATIONNAME,DESCRIPTION,IDENTIFIER,LOCATIONTYPEID,LATITUDE,LONGITUDE,SRID,ELEVATIONUNITS,ELEVATION,UTCOFFSET,TIMEZONE";
-        protected const uint identifierIndex = 5;
-
-        public GetLocationsByFolderIdTest(string name, TestSuite suite) : base(name, suite) { }
-        public override void RunTest()
-        {
-            base.RunBaseTest();
-            GetLocationsByFolderId_test();
-        }
-
-        private void GetLocationsByFolderId_test()
-        {
-            string failureMessage = string.Empty;
-
-            try
-            {
-                long locationId = base.RunGetLocationTest();
-                string folderFilter = Suite.ADSclient.GetLocationFolders();
-                string[] deliminators = new string[] { " ", "<", ">" };
-                string[] seperatedFolderFilters = folderFilter.Split(deliminators, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string filter in seperatedFolderFilters)
-                {
-                    failureMessage += getLocationByIdentifier(filter);
-                }
-
-                if (failureMessage.Length > 0)
-                {
-                    LoggerStream("GetLocationsByFolderId failed: " + failureMessage);
-                    ResultStream("FAIL");
-                }
-                else
-                {
-                    ResultStream("pass");
-                    LoggerStream("Pass. Location created:" + _location.LocationName);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                ResultStream("Threw Exception");
-                LoggerStream("Threw Exception: " + ex.ToString());
-            }
-        }
-
-        protected const string key = "LocationFolderID="; 
-        protected string getLocationByIdentifier(string filter)
-        {
-            string failureMessage = string.Empty;
-            
-            if (filter.StartsWith(key))
-            {
-                string id = filter.Substring(key.Length);
-                char[] trimCharacters = new char[] { '\"', '\\' };
-                id = id.Trim(trimCharacters);
-
-                using (TestSuite.NewContextScope(Suite.APSclient.InnerChannel))
-                {
-                    string locations = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), null);
-                    string[] locationEntries = locations.Split('\n');
-                    if (!locationEntries[0].StartsWith(ExpectedHeader))
-                    {
-                        failureMessage += "unexpected hearders returned:" + locationEntries[0];
-                    }
-
-                    if (locationEntries.Length > 1)
-                    {
-                        string[] entryData = locationEntries[1].Split(',');
-                        if (entryData.Length < identifierIndex)
-                        {
-                            return failureMessage;
-                        }
-
-                        string filterString = "IDENTIFIER=" + entryData[identifierIndex];
-                        string filteredLocation = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), filterString);
-                        if (filteredLocation.Split('\n').Length < 1)
-                        {
-                            failureMessage += "Unable to filter by Identifier. Filter used: " + filterString;
-                        }
-                    }
-                }
-            }
-
-            return failureMessage;
-        }
     }
 
     public partial class AddUpdateDeleteLocationTest : GetLocationTest
@@ -2031,24 +2059,26 @@ namespace Tests
         public AddUpdateDeleteLocationTest(string name, TestSuite suite) : base(name, suite) { }
         public override void RunTest()
         {
-            base.RunTest();
+            base.runBaseTest();
             AddUpdateDeleteLocation_test();
         }
+
         private void AddUpdateDeleteLocation_test()
         {
             System.Diagnostics.Trace.WriteLine("Add/Update/Delete location test");
             Suite.writeLog.Append("AddUpdateDeleteLocation: ");
 
-            string identifier = "Test Suite Location " + DateTime.Now.ToString();
             string locName = "Acquisition's Location For AddUpdateDeleteLocationTest";
             
             try
             {
                 //Create and Get:
-                long locId = base.RunGetLocationTest();
+                LocationList testLocations = new LocationList(Suite);
+                LocationDTO createdLocation = testLocations.createLocation();
+                long testLocationId = (long)createdLocation.LocationId;
+
                 //Modify:
-                LocationDTO modLoc = _location;
-                modLoc.Identifier = identifier;
+                LocationDTO modLoc = createdLocation;
                 modLoc.LocationName = locName;
 
                 using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
@@ -2056,29 +2086,27 @@ namespace Tests
                     Suite.AASclient.ModifyLocation(modLoc);
                 }
 
-                LocationDTO locRetAfterMod = GetLocation(locId);
+                LocationDTO locRetAfterMod = GetLocation(testLocationId);
                 if (!LocationsAreSame(modLoc, locRetAfterMod))
                 {
                     ResultStream("FAIL");
-                    LoggerStream("Some modified values were not saved. Location identifier=: " + identifier);
-                    Suite.ADSclient.SaveLocation(new Location() { AQDataID = locId, IsDeleted = true });
+                    LoggerStream("Some modified values were not saved. Location identifier=: " + createdLocation.Identifier);
+                    Suite.ADSclient.SaveLocation(new Location() { AQDataID = testLocationId, IsDeleted = true });
                     return;
                 }
 
                 //Delete:We'll use aquariusDataService
-                Suite.ADSclient.SaveLocation(new Location() { AQDataID = locId, IsDeleted = true });
+                Suite.ADSclient.SaveLocation(new Location() { AQDataID = testLocationId, IsDeleted = true });
 
                 LocationDTO nullLoc = null;
                 using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
                 {
-                    nullLoc = Suite.AASclient.GetLocation(locId);
+                    nullLoc = Suite.AASclient.GetLocation(testLocationId);
                 }
                 if (nullLoc != null)
                 {
-                    //ResultStream = "FAIL";
-                    //LoggerStream("The location was not deleted from the database. Location identifier=: " + identifier);
                     ResultStream("FAIL");
-                    LoggerStream("The location was not deleted from the databse.  Location identifier =: " + identifier);
+                    LoggerStream("The location was not deleted from the databse.  Location identifier =: " + createdLocation.Identifier);
                     return;
                 }
                 ResultStream("pass");
@@ -2090,6 +2118,7 @@ namespace Tests
             }
         }
     }
+
     #endregion
 
     public class PerformanceTest
