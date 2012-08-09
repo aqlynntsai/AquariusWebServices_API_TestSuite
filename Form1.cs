@@ -26,7 +26,8 @@ namespace API_TestSuite_GUI
         bool gotClients;
         public string connectedHost = "";
 
-        string logPath;
+        protected string logPath;
+
         public StringBuilder writeLog = new StringBuilder();
 
         CustomAppendWatcher customWatcher;
@@ -227,6 +228,9 @@ namespace API_TestSuite_GUI
                 new AddUpdateDeleteLocationTest("Add Update Delete Location", this),
                 new GetLocationTest("Create and Get Location", this),
                 new GetAllLocationsTest("Get all existing locations", this),
+                new SaveFieldVisitTest("Save Field Visit", this),
+                new GetFieldVisitsByLocationTest("Get Field Visits By Location", this),
+                new GetFieldVisitsByLocationAndDateTest("GetFieldVisitsByLocationAndDateTest", this)
             };
 
             PublishTestList = new PublishTestMethod[]
@@ -255,6 +259,10 @@ namespace API_TestSuite_GUI
                 new GetTimeSeriesDataResampledTest("Get All Time Series Data Resampled", this, SinceWhen),
                 new GetLocationsTest("Get Locations by a user specified query string", this),
                 new GetLocationsByFolderIdTest("Get Location By FolderId", this),
+                new GetRatingTableTest("GetRatingTable", this),
+                new GetRatingTableExtensionTest("GetRatingTableExtensionTest", this),
+                new GetTemplateListTest("GetTemplateList", this),
+                new GetReportDataTest("GetReportData", this)
            };
             int i = 0;
             AcquisitionTestNames = new string[AcquisitionTestList.Length];

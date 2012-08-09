@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.ServiceModel;
 
 using API_TestSuite_GUI;
 using API_TestSuite_GUI.AASreference;
@@ -463,6 +464,76 @@ namespace Tests
         protected TestSuite _caller;
     }
 
+    public class csvData
+    {
+        static string[] rowDeliminaters = new string[] { "\n", "\r" };
+        static string[] columnDeliminaters = new string[] { "," };
+        
+        public csvData(string rawData)
+        {
+            List<string> rows = getRowsList(rawData);
+            if (rows.Count < 1)
+            {
+                return;
+            }
+
+            List<string> headers = getEntriesFromRow(rows[0]);
+            for(uint columnIndex=0; columnIndex < headers.Count; ++columnIndex)
+            {
+                _headers.Add(columnIndex, headers[(int)columnIndex]);
+            }
+            rows.RemoveAt(0);
+
+            rows.ForEach(delegate(string row)
+            {
+                List<string> entries = getEntriesFromRow(row);
+                _tableValues.Add(entries);
+            });
+        }
+
+        static List<string> getRowsList(string rowsData)
+        {
+            List<string> rowsList = new List<string>();
+            string[] rows = rowsData.Split(rowDeliminaters, StringSplitOptions.RemoveEmptyEntries);
+            foreach(string row in rows)
+            {
+                rowsList.Add(row);
+            }
+            return rowsList;
+        }
+
+        static List<string> getEntriesFromRow(string row)
+        {
+            List<string> entriesList = new List<string>();
+            string[] entries = row.Split(columnDeliminaters, StringSplitOptions.None);
+            foreach (string entry in entries)
+            {
+                entriesList.Add(entry.Trim());
+            }
+            return entriesList;
+        }
+
+        public string checkHeaders(string[] expectedHeaders)
+        {
+            foreach (string headerEntry in expectedHeaders)
+            {
+                if (!_headers.ContainsValue(headerEntry))
+                {
+                    return "Unexpected headers found: "
+                        + _headers
+                        + "Expected: "
+                        + expectedHeaders;
+                }
+            }
+            return string.Empty;
+        }
+
+        public Dictionary<uint, string> _headers = new Dictionary<uint,string>();
+        public List<List<string>> _tableValues = new List< List<string> >();
+    }
+
+
+
     #region PublishTests
     public abstract class PublishTestMethod : TestMethod
     {
@@ -474,8 +545,40 @@ namespace Tests
         public override void RunTest()
         {
             base.RunTest();
-
         }
+
+        protected void testPublishServiceAPI(publishServiceMethodDelegate method)
+        {
+            LoggerStream(Name + ":");
+            string result = tryInvokePublishServiceMethod(method);
+            if (result.Length > 0)
+            {
+                ResultStream(result);
+            }
+            else
+            {
+                ResultStream("Passed. ");
+                Suite.AppendToLog("Passed. ");
+            }            
+        }
+
+        protected string tryInvokePublishServiceMethod(publishServiceMethodDelegate method)
+        {
+            try
+            {
+                using (TestSuite.NewContextScope((Suite.APSclient).InnerChannel))
+                {
+                    return method();
+                }
+            }
+            catch (Exception e)
+            {
+                LoggerStream("Exception Message: " + e.Message);
+                return "Threw Exception";
+            }
+        }
+
+        protected delegate string publishServiceMethodDelegate();
     }
 
     public partial class GetParameterListTest : PublishTestMethod
@@ -736,7 +839,7 @@ namespace Tests
                     return;
                 }
 
-                char numPtsChanged = linesplitDataSet[1].Split(',')[12][0];
+                char numPtsChanged = linesplitDataSet[1].Split(new string[] {",", " "}, StringSplitOptions.RemoveEmptyEntries)[12][0];
                 if (numPtsChanged == '6')
                 {
                     ResultStream("pass");
@@ -1591,6 +1694,245 @@ namespace Tests
         }
     }
 
+    class GetRatingTableTest : PublishTestMethod
+    {
+        public GetRatingTableTest(string name, TestSuite suite)
+            : base(name, suite)
+        {
+        }
+        
+        static string[] expectedHeaders = {"LocationId","InParameter","OutParameter","NumTables","NumPeriods","NumPoints"};
+        
+        public static string checkRatingTableCsv(csvData ratingTableCsv)
+        {
+            return ratingTableCsv.checkHeaders(expectedHeaders);
+        }
+
+        public override void RunTest()
+        {
+            base.RunTest();
+            testPublishServiceAPI(
+                delegate()
+                {
+                    string ratingTableData = Suite.APSclient.GetRatingTable(Suite.tsLoc, null, null);
+                    csvData ratingTableCsv = new csvData(ratingTableData);
+                    
+                    if(ratingTableCsv._headers.Count == 0)
+                    {
+                        Suite.AppendToLog("Skipped: No rating table at location");
+                        return "Skipped.";
+                    }
+                    else
+                    {
+                        return checkRatingTableCsv(ratingTableCsv);
+                    }
+                }
+            );
+        }
+    }
+
+    class GetRatingTableExtensionTest : PublishTestMethod
+    {
+        public GetRatingTableExtensionTest(string name, TestSuite suite)
+            : base(name, suite)
+        {
+        }
+
+        protected publishServiceMethodDelegate getRatingTableExtensionDelegate(string label)
+        {
+            return delegate()
+                {
+                    string ratingTableData = Suite.APSclient.GetRatingTableExtension(Suite.tsLoc, null, null, label);
+                    csvData ratingTableCsv = new csvData(ratingTableData);
+
+                    if (ratingTableCsv._headers.Count == 0)
+                    {
+                        Suite.AppendToLog("Skipped: No rating table at location");
+                        return "Skipped.";
+                    }
+                    else
+                    {
+                        return GetRatingTableTest.checkRatingTableCsv(ratingTableCsv);
+                    }
+                };
+        }
+
+        string[] expectedHeaders = { "LocationId", "InParameter", "OutParameter", "NumTables", "NumPeriods", "NumPoints" };
+        public override void RunTest()
+        {
+            base.RunTest();
+            string ratingTableData = tryInvokePublishServiceMethod(
+                delegate()
+                {
+                    return Suite.APSclient.GetRatingTable(Suite.tsLoc, null, null);
+                });
+            
+            csvData ratingTableCsv = new csvData(ratingTableData);
+            if (ratingTableCsv._headers.Count == 0)
+            {
+                testPublishServiceAPI(getRatingTableExtensionDelegate(null));
+            }
+            else
+            {
+                testPublishServiceAPI(getRatingTableExtensionDelegate("rating"));
+            }
+        }
+    }
+    struct TemplateItem
+    {
+        public TemplateItem(string reportId, string label, string type)
+        {
+            _reportId = "";
+            _label = "";
+            uint typeInt = Convert.ToUInt32(type.Trim());
+            
+            if (typeInt == 0)
+            {
+                _type = reportType.Template;
+            }
+            else if (typeInt == 1)
+            {
+                _type = reportType.Description;
+            }
+            else
+            {
+                throw new Exception("Invalid template type");
+            }
+            _reportId += reportId;
+            _label += label;
+        }
+
+        public string _reportId;
+        public string _label;
+        public enum reportType : uint
+        {
+            Template = 0,
+            Description = 1,
+        }
+        public reportType _type;
+    }
+
+    class TemplateItemList
+    {
+        public TemplateItemList(string listData)
+        {
+            if(listData.Length == 0)
+            {
+                throw new Exception("TemplateItemList: listData empty");
+            }
+            _templateList = getTemplateList(listData);
+        }
+
+        public static List<TemplateItem> getTemplateList(string templateListData)
+        {
+            List<TemplateItem> list = new List<TemplateItem>();
+
+            csvData templateListCsv = new csvData(templateListData);
+            if (templateListCsv._headers.Count == 0)
+            {
+                return list;
+            }
+            string headerError = templateListCsv.checkHeaders(expectedHeaders);
+            if (headerError != string.Empty)
+            {
+                throw new Exception(headerError);
+            }
+
+            templateListCsv._tableValues.ForEach(delegate(List<string> listEntry)
+            {
+                list.Add(new TemplateItem(listEntry[0], listEntry[1], listEntry[2]));
+            });
+            return list;
+        }
+
+        static string[] expectedHeaders = { "Id", "Label", "Type (0=Template; 1=Description)" };
+        const uint expectedHeaderCount = 3;
+
+        List<TemplateItem> _templateList;
+        public List<TemplateItem> getList()
+        {
+            return _templateList;
+        }
+    }
+
+    class GetTemplateListTest : PublishTestMethod
+    {
+        public GetTemplateListTest(string name, TestSuite suite)
+            : base(name, suite)
+        {
+        }
+
+        string[] expectedHeaders = {"Id","Label","Type"};
+        public override void RunTest()
+        {
+            base.RunTest();
+            testPublishServiceAPI(
+                delegate()
+                {
+                    string templateListData = Suite.APSclient.GetTemplateList();
+                    try
+                    {
+                        TemplateItemList templateItemList = new TemplateItemList(templateListData);
+                        
+                        if (templateItemList.getList().Count == 0)
+                        {
+                            Suite.AppendToLog("Warning: Template CSV in correct format, but no System templates were found at chosen location");
+                        }
+                        return string.Empty;
+                    }
+                    catch (Exception ex)
+                    {
+                        return ex.Message;
+                    }
+                }
+            );
+        }
+    }
+
+    class GetReportDataTest : PublishTestMethod
+    {
+        public GetReportDataTest(string name, TestSuite suite)
+            : base(name, suite)
+        {
+        }
+
+        public override void RunTest()
+        {
+            base.RunTest();
+            GetReportData_test();
+        }
+
+        private void GetReportData_test()
+        {
+            initSuite();
+            string templateList = base.tryInvokePublishServiceMethod(
+                delegate()
+                {
+                    return Suite.APSclient.GetTemplateList();
+                }
+            );
+
+            TemplateItemList templateItemList = new TemplateItemList(templateList);
+            if(templateItemList.getList().Count == 0)
+            {
+                ResultStream("Skip");
+                LoggerStream("Skipped: No templates");
+            }
+
+            string reportPath = AppDomain.CurrentDomain.BaseDirectory + "ResultLog";
+            string reportId = templateItemList.getList()[0]._reportId;
+            int reportType = (int)templateItemList.getList()[0]._type;
+
+            base.testPublishServiceAPI(
+                delegate()
+                {
+                    Suite.APSclient.GetReportData(Suite.tsName, reportId, reportType, reportPath, "GetReportDataTest");
+                    return string.Empty;
+                }
+            );
+        }
+    }
+
     #endregion
 
     #region AcquisitionTests
@@ -1605,6 +1947,29 @@ namespace Tests
         {
             base.RunTest();
         }
+
+        protected OperationContextScope getOperationContextScope()
+        {
+            return TestSuite.NewContextScope(Suite.AASclient.InnerChannel);
+        }
+
+        protected string tryInvokeAcquisitionServiceMethod(acquisitionServiceMethodDelegate method)
+        {
+            try
+            {
+                using (getOperationContextScope())
+                {
+                    return method();
+                }
+            }
+            catch (Exception e)
+            {
+                LoggerStream("Exception Message: " + e.Message);
+                return "Threw Exception";
+            }
+        }
+        
+        protected delegate string acquisitionServiceMethodDelegate();
     }
 
     public partial class CreateTimeSeriesTest : AcquisitionTestMethod
@@ -2149,6 +2514,242 @@ namespace Tests
         }
     }
 
+    public class FieldVisitTests : AcquisitionTestMethod
+    {
+        protected FieldVisitTests(string name, TestSuite suite)
+            : base(name, suite)
+        {
+        }
+
+        ~FieldVisitTests()
+        {
+            _savedFieldVisit.ForEach(delegate(FieldVisit saved)
+            {
+                deleteSavedFieldVisit(saved);
+            });
+        }
+
+        protected FieldVisit saveFieldVisit(FieldVisit visit)
+        {
+            FieldVisit saved = visit;
+            try
+            {
+                using (getOperationContextScope())
+                {
+                    // save the visit
+                    saved = Suite.AASclient.SaveFieldVisit(visit); // The returned object will contain the assigned IDs for each record
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerStream("SaveFieldVisit Exception Message: " + ex.Message);
+                return visit;
+            }
+
+            if (saved != null)
+            {
+                _savedFieldVisit.Add(saved);
+            }
+
+            return saved;
+        }
+
+        protected void deleteSavedFieldVisit(FieldVisit visit)
+        {
+            if(visit == null)
+            {
+                return;
+            }
+
+            _savedFieldVisit.ForEach(delegate(FieldVisit saved)
+            {
+                if(saved.FieldVisitID == Math.Abs(visit.FieldVisitID))
+                {
+                    _savedFieldVisit.Remove(saved);
+                }
+            });
+
+            if (visit.FieldVisitID > 0)
+            {
+                visit.FieldVisitID *= (-1);
+            }
+            if (saveFieldVisit(visit) !=  null)
+            {
+                Suite.AppendToLog("Unable to delete saved FieldVisit. FieldVisitID: " + visit.FieldVisitID);
+            }
+        }
+        
+        public static FieldVisit createNewFieldVisit(long locationId)
+        {
+            FieldVisit visit = new FieldVisit();
+            visit.LocationID = locationId;
+            visit.FieldVisitID = 0; // Set to 0 to create a new field visit
+            visit.StartDate = new DateTime(2011, 07, 08, 12, 00, 00); // start time is required
+            visit.EndDate = new DateTime(2011, 07, 08, 13, 00, 00); // end time is optional
+            visit.Party = ""; // optional - supports multiple lines
+            visit.Remarks = ""; // optional - supports multiple lines
+            // Create a new measurement object to contain observations
+            FieldVisitMeasurement measurement = new FieldVisitMeasurement();
+            measurement.MeasurementID = 0; // set to 0 to create new measurement
+            measurement.FieldVisitID = visit.FieldVisitID; // must match visit id
+            // set the "magic string" that tells the generic field visit plug in to display this measurement
+            measurement.MeasurementType = "AqFvtPlugin_MeasurementActivity";
+            measurement.MeasurementTime = visit.StartDate;
+            measurement.MeasurementEndTime = visit.EndDate; // End Time is optional
+
+            // create stage measurement
+            FieldVisitResult stage = new FieldVisitResult();
+            stage.MeasurementID = measurement.MeasurementID; // must match measurement id
+            stage.ResultID = 0; // set to 0 to create new result record
+            stage.StartTime = visit.StartDate;
+            stage.ParameterID = "HG"; // Must match a ParameterID found on the Parameters tab of AQUARIUS Manager
+            stage.UnitID = "m"; // Must match a UnitID found on the Units tab of AQUARIUS Manager
+            stage.ObservedResult = 5.0;
+
+            // create discharge measurement
+            FieldVisitResult discharge = new FieldVisitResult();
+            discharge.MeasurementID = measurement.MeasurementID;
+            discharge.ResultID = 0;
+            discharge.StartTime = visit.StartDate;
+            discharge.ParameterID = "QR";
+            discharge.UnitID = "m^3/s";
+            discharge.ObservedResult = 35.0;
+
+            // set measurement results
+            measurement.Results = new FieldVisitResult[] { stage, discharge };
+            visit.Measurements = new FieldVisitMeasurement[] { measurement };
+
+            return visit;
+        }
+
+        protected List<FieldVisit> _savedFieldVisit = new List<FieldVisit>();
+    }
+
+    public class SaveFieldVisitTest : FieldVisitTests
+    {
+        public SaveFieldVisitTest(string name, TestSuite suite)
+            : base(name, suite)
+        {
+        }
+
+        public override void RunTest()
+        {
+            base.RunTest();
+            SaveFieldVisit_test();
+        }
+
+        protected void checkSavedFieldVisit(FieldVisit saved)
+        {
+            if (saved == null)
+            {
+                ResultStream("FAIL");
+                LoggerStream("Null returned. FieldVisit deleted.");
+            }
+            else if (saved.FieldVisitID <= 0)
+            {
+                ResultStream("FAIL");
+                LoggerStream("Invalid FieldVisitID found returned");
+            }
+            else
+            {
+                ResultStream("PASS");
+                LoggerStream("Pass");
+            }
+        }
+
+        private void SaveFieldVisit_test()
+        {
+            FieldVisit visit = createNewFieldVisit(Suite.tsLocID);
+            FieldVisit saved = saveFieldVisit(visit);
+            checkSavedFieldVisit(saved);
+        }
+    }
+
+    public class GetFieldVisitsByLocationTest : FieldVisitTests
+    {
+        public GetFieldVisitsByLocationTest(string name, TestSuite suite)
+            : base(name, suite)
+        {
+        }
+
+        public override void RunTest()
+        {
+            base.RunTest();
+            GetFieldVisitsByLocation_test();
+        }
+
+        public static string checkRetrievedFieldVisit(FieldVisit[] visits, FieldVisit saved)
+        {
+            bool found = false;
+            foreach (FieldVisit retrieved in visits)
+            {
+                if (retrieved.LocationID != saved.LocationID)
+                {
+                    return "GetLocationsByFolderId returned a FieldVisit object from an unexpected Location";
+                }
+
+                if (retrieved.FieldVisitID == saved.FieldVisitID)
+                {
+                    found = true;
+                }
+            }
+
+            if (!found)
+            {
+                return "GetFieldVisitsByLocation: unable to retrieve saved location at " + saved.LocationID;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        protected virtual string getSavedFieldVisit(FieldVisit saved)
+        {
+            return base.tryInvokeAcquisitionServiceMethod(delegate()
+            {
+                FieldVisit[] visits = Suite.AASclient.GetFieldVisitsByLocation(saved.LocationID);
+                return GetFieldVisitsByLocationTest.checkRetrievedFieldVisit(visits, saved);
+            });
+        }
+
+        private void GetFieldVisitsByLocation_test()
+        {
+            FieldVisit visit = createNewFieldVisit(Suite.tsLocID);
+            FieldVisit saved = saveFieldVisit(visit);
+
+            string failureMessage = getSavedFieldVisit(saved);
+
+            if (failureMessage.Length > 0)
+            {
+               ResultStream("FAIL");
+               LoggerStream("GetFieldVisitsByLocation failed: " + failureMessage);
+            }
+            else
+            {
+                ResultStream("PASS");
+                LoggerStream("Pass");
+            }
+        }
+    }
+    
+    public class GetFieldVisitsByLocationAndDateTest : GetFieldVisitsByLocationTest
+    {
+        public GetFieldVisitsByLocationAndDateTest(string name, TestSuite suite)
+            : base(name, suite)
+        {
+        }
+
+        protected override string getSavedFieldVisit(FieldVisit saved)
+        {
+            return base.tryInvokeAcquisitionServiceMethod(delegate()
+            {
+                FieldVisit[] visits = Suite.AASclient.GetFieldVisitsByLocationAndDate(saved.LocationID, saved.StartDate);
+                return GetFieldVisitsByLocationTest.checkRetrievedFieldVisit(visits, saved);
+            });
+        }
+    }
+
     #endregion
 
     public class PerformanceTest
@@ -2175,6 +2776,4 @@ namespace Tests
         private DateTime stop;
         private TimeSpan interim;
     }
-
-
 }

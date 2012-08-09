@@ -379,7 +379,6 @@
     <None Include="Service References\ADSreference\AquariusDataService6.wsdl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
     <None Include="Service References\APSreference\AquariusPublishService1.disco" />
     <None Include="Service References\APSreference\AquariusPublishService1.wsdl" />
     <None Include="Service References\APSreference\AquariusPublishService3.xsd" />
