@@ -226,7 +226,9 @@ namespace API_TestSuite_GUI
                 new UndoAppendTest("Undo Append", this),
                 new DeleteTimeSeriesTest("Delete Time Series", this),
                 new AddUpdateDeleteLocationTest("Add Update Delete Location", this),
-                new GetLocationTest("Create and Get Location", this),
+                new GetLocationTest("Create and GetLocation by location Id", this),
+                new CreateAndGetLocationIdTest("Create GetLocationId by location identifier", this),
+                new GetLocationIdTest("Get current LocationId", this),
                 new GetAllLocationsTest("Get all existing locations", this),
                 new SaveFieldVisitTest("Save Field Visit", this),
                 new GetFieldVisitsByLocationTest("Get Field Visits By Location", this),
@@ -262,7 +264,7 @@ namespace API_TestSuite_GUI
                 new GetRatingTableTest("GetRatingTable", this),
                 new GetRatingTableExtensionTest("GetRatingTableExtensionTest", this),
                 new GetTemplateListTest("GetTemplateList", this),
-                new GetReportDataTest("GetReportData", this)
+                new GetReportDataTest("GetReportData", this, null/*logPath.Split('.')[0]*/ )
            };
             int i = 0;
             AcquisitionTestNames = new string[AcquisitionTestList.Length];
