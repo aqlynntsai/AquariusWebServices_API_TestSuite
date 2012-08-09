@@ -480,7 +480,7 @@ namespace Tests
             List<string> headers = getEntriesFromRow(rows[0]);
             for(uint columnIndex=0; columnIndex < headers.Count; ++columnIndex)
             {
-                _headers.Add(columnIndex, headers[(int)columnIndex]);
+                _headers.Add(headers[(int)columnIndex], columnIndex);
             }
             rows.RemoveAt(0);
 
@@ -494,6 +494,7 @@ namespace Tests
         static List<string> getRowsList(string rowsData)
         {
             List<string> rowsList = new List<string>();
+            // remove empty row.
             string[] rows = rowsData.Split(rowDeliminaters, StringSplitOptions.RemoveEmptyEntries);
             foreach(string row in rows)
             {
@@ -505,6 +506,7 @@ namespace Tests
         static List<string> getEntriesFromRow(string row)
         {
             List<string> entriesList = new List<string>();
+            // do not remove empty entries
             string[] entries = row.Split(columnDeliminaters, StringSplitOptions.None);
             foreach (string entry in entries)
             {
@@ -517,18 +519,18 @@ namespace Tests
         {
             foreach (string headerEntry in expectedHeaders)
             {
-                if (!_headers.ContainsValue(headerEntry))
+                if (!_headers.ContainsKey(headerEntry))
                 {
                     return "Unexpected headers found: "
-                        + _headers
-                        + "Expected: "
+                        + _headers.Keys.ToString()
+                        + "\nExpected: "
                         + expectedHeaders;
                 }
             }
             return string.Empty;
         }
 
-        public Dictionary<uint, string> _headers = new Dictionary<uint,string>();
+        public Dictionary<string, uint> _headers = new Dictionary<string, uint>();
         public List<List<string>> _tableValues = new List< List<string> >();
     }
 
@@ -839,7 +841,7 @@ namespace Tests
                     return;
                 }
 
-                char numPtsChanged = linesplitDataSet[1].Split(new string[] {",", " "}, StringSplitOptions.RemoveEmptyEntries)[12][0];
+                char numPtsChanged = linesplitDataSet[1].Split(',')[12][0];
                 if (numPtsChanged == '6')
                 {
                     ResultStream("pass");
@@ -1666,30 +1668,54 @@ namespace Tests
                 using (TestSuite.NewContextScope(Suite.APSclient.InnerChannel))
                 {
                     string locations = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), null);
-                    string[] locationEntries = locations.Split('\n');
-                    if (!locationEntries[0].StartsWith(ExpectedHeader))
+                    csvData unfilteredLocations = new csvData(locations);
+                    failureMessage = unfilteredLocations.checkHeaders(ExpectedHeader.Split(','));
+                    if (failureMessage != string.Empty)
                     {
-                        failureMessage += "unexpected hearders returned:" + locationEntries[0];
+                        return failureMessage;
                     }
 
-                    if (locationEntries.Length > 1)
+                    if(unfilteredLocations._tableValues.Count == 0 )
                     {
-                        string[] entryData = locationEntries[1].Split(',');
-                        if (entryData.Length < identifierIndex)
-                        {
-                            return failureMessage;
-                        }
+                        return string.Empty;
+                    }
 
-                        string filterString = "IDENTIFIER=" + entryData[identifierIndex];
-                        string filteredLocation = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), filterString);
-                        if (filteredLocation.Split('\n').Length < 1)
+                    List<String> entryData = unfilteredLocations._tableValues[0];
+                    uint identifierIndex = unfilteredLocations._headers["IDENTIFIER"];
+                    
+                    if (entryData.Count <= identifierIndex)
+                    {
+                        return "Unexpected row data returned: " + entryData.ToString();
+                    }
+
+                    string chosenIdentifier = entryData[(int)identifierIndex].Trim();
+                    string filterString = "IDENTIFIER=" + chosenIdentifier;
+                    locations = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), filterString);
+                    
+                    csvData filteredLocations = new csvData(locations);
+                    failureMessage = filteredLocations.checkHeaders(ExpectedHeader.Split(','));
+                    
+                    if (failureMessage != string.Empty)
+                    {
+                        return failureMessage;
+                    }
+
+                    string unexpectedLocations = string.Empty;
+                    filteredLocations._tableValues.ForEach(delegate(List<string> location)
+                    {
+                        if (location[(int)identifierIndex].Trim() != chosenIdentifier)
                         {
-                            failureMessage += "Unable to filter by Identifier. Filter used: " + filterString;
+                            unexpectedLocations += location.ToString() + "\n";
                         }
+                    });
+
+                    if (unexpectedLocations != string.Empty)
+                    {
+                        failureMessage = "Unexpected location identifier returned by GetLocationsByFolderId with Identifier filter.\nLocation data: ";
+                        failureMessage += unexpectedLocations;
                     }
                 }
             }
-
             return failureMessage;
         }
     }
@@ -2363,7 +2389,8 @@ namespace Tests
                 ResultStream("Threw Exception");
                 LoggerStream("Threw Exception: " + ex.ToString());
             }
-            ResultStream("pass");
+
+            ResultStream("Pass");
         }
     }
 
