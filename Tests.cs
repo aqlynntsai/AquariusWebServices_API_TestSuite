@@ -1891,9 +1891,10 @@ namespace Tests
 
     class GetReportDataTest : PublishTestMethod
     {
-        public GetReportDataTest(string name, TestSuite suite)
+        public GetReportDataTest(string name, TestSuite suite, string outputPath)
             : base(name, suite)
         {
+            _outputPath = outputPath;
         }
 
         public override void RunTest()
@@ -1919,18 +1920,25 @@ namespace Tests
                 LoggerStream("Skipped: No templates");
             }
 
-            string reportPath = AppDomain.CurrentDomain.BaseDirectory + "ResultLog";
             string reportId = templateItemList.getList()[0]._reportId;
             int reportType = (int)templateItemList.getList()[0]._type;
 
             base.testPublishServiceAPI(
                 delegate()
                 {
-                    Suite.APSclient.GetReportData(Suite.tsName, reportId, reportType, reportPath, "GetReportDataTest");
-                    return string.Empty;
+                    Stream reportStream = Suite.APSclient.GetReportData(Suite.tsName, reportId, reportType, null, _outputPath);
+                    if (reportStream != null && reportStream.CanRead)
+                    {
+                        return string.Empty;
+                    }
+
+                    Suite.AppendToLog("Failed: GetReportData returned empty stream");
+                    return "Failed.";
                 }
             );
         }
+
+        private string _outputPath;
     }
 
     #endregion
@@ -2396,25 +2404,26 @@ namespace Tests
             try
             {
                 LocationDTO createdLocation = testLocations.createLocation();
-                LocationDTO returnedLocation = GetLocation((long)createdLocation.LocationId);
+                LocationDTO returnedLocation = GetLocation(createdLocation);
                 AssertLocationsAreSame(createdLocation, returnedLocation);
             }
             catch (Exception ex)
             {
-                throw ex;
+                ResultStream("Threw Exception");
+                LoggerStream("Threw Exception: " + ex.ToString());
             }
         }
 
-        protected virtual LocationDTO GetLocation(long locationId)
+        protected virtual LocationDTO GetLocation(LocationDTO createdLocation)
         {
             LocationDTO locationReturned = null;
             using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
             {
-                locationReturned = Suite.AASclient.GetLocation(locationId);
+                locationReturned = Suite.AASclient.GetLocation((long)createdLocation.LocationId);
             }
-            if (locationId != locationReturned.LocationId)
+            if (createdLocation.LocationId != locationReturned.LocationId)
             {
-                throw new Exception("GetLocaion(long LocationId) returned a LocationDTO with mismatched locationId");
+                throw new Exception("GetLocation(long LocationId) returned a LocationDTO with mismatched locationId");
             }
             return locationReturned;
         }
@@ -2449,6 +2458,58 @@ namespace Tests
         }
     }
 
+    public class CreateAndGetLocationIdTest : GetLocationTest
+    {
+        public CreateAndGetLocationIdTest(string name, TestSuite suite) : base(name, suite) { }
+
+        protected override LocationDTO GetLocation(LocationDTO createdLocation)
+        {
+            long locationIdReturned = -1;
+            using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
+            {
+                locationIdReturned = Suite.AASclient.GetLocationId(createdLocation.Identifier);
+            }
+            if (locationIdReturned != createdLocation.LocationId)
+            {
+                throw new Exception("GetLocationId(string Identifier) returned a mismatched locationId");
+            }
+            return base.GetLocation(createdLocation);
+        }
+    }
+
+    public class GetLocationIdTest : GetLocationTest
+    {
+        public GetLocationIdTest(string name, TestSuite suite) : base(name, suite) { }
+        public override void RunTest()
+        {
+            base.runBaseTest();
+            GetLocationId_test();
+        }
+
+        private void GetLocationId_test()
+        {
+            long locationIdReturned = -1;
+            try
+            {
+                using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
+                {
+                    locationIdReturned = Suite.AASclient.GetLocationId(Suite.tsLoc);
+                }
+
+                if (locationIdReturned != Suite.tsLocID)
+                {
+                    ResultStream("Failed");
+                    LoggerStream("Failed: GetLocationId(string Identifier) returned unexpected LocationId");
+                }
+            }
+            catch (Exception ex)
+            {
+                ResultStream("Threw Exception");
+                LoggerStream("Threw Exception: " + ex.ToString());
+            }
+        }
+    }
+
     public partial class AddUpdateDeleteLocationTest : GetLocationTest
     {
         public AddUpdateDeleteLocationTest(string name, TestSuite suite) : base(name, suite) { }
@@ -2470,7 +2531,6 @@ namespace Tests
                 //Create and Get:
                 LocationList testLocations = new LocationList(Suite);
                 LocationDTO createdLocation = testLocations.createLocation();
-                long testLocationId = (long)createdLocation.LocationId;
 
                 //Modify:
                 LocationDTO modLoc = createdLocation;
@@ -2481,7 +2541,9 @@ namespace Tests
                     Suite.AASclient.ModifyLocation(modLoc);
                 }
 
-                LocationDTO locRetAfterMod = GetLocation(testLocationId);
+                LocationDTO locRetAfterMod = GetLocation(createdLocation);
+                long testLocationId = (long)locRetAfterMod.LocationId;
+
                 if (!LocationsAreSame(modLoc, locRetAfterMod))
                 {
                     ResultStream("FAIL");
