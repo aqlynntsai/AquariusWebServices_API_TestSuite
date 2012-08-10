@@ -560,8 +560,8 @@ namespace Tests
             }
             else
             {
-                ResultStream("Passed. ");
-                Suite.AppendToLog("Passed. ");
+                ResultStream("Passed");
+                Suite.AppendToLog("Passed");
             }            
         }
 
@@ -1609,7 +1609,8 @@ namespace Tests
 
     public class GetLocationsByFolderIdTest : GetLocationsTest
     {
-        protected const uint identifierIndex = 5;
+        protected const string key = "LocationFolderID=";
+        protected const string identifier = "IDENTIFIER";
 
         public GetLocationsByFolderIdTest(string name, TestSuite suite) : base(name, suite) { }
         public override void RunTest()
@@ -1646,7 +1647,6 @@ namespace Tests
                     ResultStream("pass");
                     LoggerStream("Pass. Location created:" + testLocationDTO.LocationName);
                 }
-
             }
             catch (Exception ex)
             {
@@ -1655,69 +1655,125 @@ namespace Tests
             }
         }
 
-        protected const string key = "LocationFolderID=";
-        protected string getLocationByIdentifier(string filter)
+        protected string getLocationsByFolderId(int folderId, string filter)
         {
-            string failureMessage = string.Empty;
-
-            if (filter.StartsWith(key))
+            string locations = string.Empty;
+            try
             {
-                string id = filter.Substring(key.Length);
-                char[] trimCharacters = new char[] { '\"', '\\' };
-                id = id.Trim(trimCharacters);
-
                 using (TestSuite.NewContextScope(Suite.APSclient.InnerChannel))
                 {
-                    string locations = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), null);
-                    csvData unfilteredLocations = new csvData(locations);
-                    failureMessage = unfilteredLocations.checkHeaders(ExpectedHeader.Split(','));
-                    if (failureMessage != string.Empty)
-                    {
-                        return failureMessage;
-                    }
+                    locations = Suite.APSclient.GetLocationsByFolderId(folderId, filter);
+                }
+                return locations;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
-                    if(unfilteredLocations._tableValues.Count == 0 )
-                    {
-                        return string.Empty;
-                    }
+        protected string checkLocationsCsv(csvData locationsCsv, Func<csvData, string> tableContentValidation)
+        {
+            string failureMessage = locationsCsv.checkHeaders(ExpectedHeader.Split(','));
+            if (failureMessage != string.Empty)
+            {
+                return failureMessage;
+            }
 
-                    List<String> entryData = unfilteredLocations._tableValues[0];
-                    uint identifierIndex = unfilteredLocations._headers["IDENTIFIER"];
-                    
-                    if (entryData.Count <= identifierIndex)
-                    {
-                        return "Unexpected row data returned: " + entryData.ToString();
-                    }
+            if (locationsCsv._tableValues.Count == 0)
+            {
+                return "No locations found in folder";
+            }
 
-                    string chosenIdentifier = entryData[(int)identifierIndex].Trim();
-                    string filterString = "IDENTIFIER=" + chosenIdentifier;
-                    locations = Suite.APSclient.GetLocationsByFolderId(Convert.ToInt64(id), filterString);
-                    
-                    csvData filteredLocations = new csvData(locations);
-                    failureMessage = filteredLocations.checkHeaders(ExpectedHeader.Split(','));
-                    
-                    if (failureMessage != string.Empty)
-                    {
-                        return failureMessage;
-                    }
+            return tableContentValidation(locationsCsv);
+        }
 
+        Func<csvData, string> checkLocationsCsvFunc = delegate(csvData locationsCsv)
+        {
+            string failureMessage = locationsCsv.checkHeaders(ExpectedHeader.Split(','));
+            if (failureMessage != string.Empty)
+            {
+                return failureMessage;
+            }
+
+            if (locationsCsv._tableValues.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            uint identifierIndex = locationsCsv._headers[identifier];
+            locationsCsv._tableValues.ForEach(delegate(List<String> entryData){
+                if (entryData.Count <= identifierIndex)
+                {
+                    failureMessage+= "Unexpected row data returned: " + entryData.ToString();
+                }
+            });
+
+            return failureMessage;
+        };
+
+        protected string getLocationByIdentifier(string filter)
+        {
+            if (!filter.StartsWith(key))
+            {
+                return string.Empty;
+            }
+            // First use null filter
+            string id = filter.Substring(key.Length);
+            char[] trimCharacters = new char[] { '\"', '\\' };
+            id = id.Trim(trimCharacters);
+
+            string failureMessage = string.Empty;
+            string locations = string.Empty;
+
+            locations = getLocationsByFolderId(Convert.ToInt32(id), null);
+            csvData unfilteredLocations = new csvData(locations);
+            failureMessage += checkLocationsCsvFunc(unfilteredLocations);
+            if (failureMessage.Length > 0)
+            {
+                return failureMessage;
+            }
+
+            if (unfilteredLocations._tableValues.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            // use IDENTIFIER as filter
+            List<String> entryData = unfilteredLocations._tableValues[0];
+            uint identifierIndex = unfilteredLocations._headers[identifier];
+
+            string chosenIdentifier = entryData[(int)identifierIndex].Trim();
+            string filterString = identifier + "=" + chosenIdentifier;
+
+            locations = getLocationsByFolderId(Convert.ToInt32(id), filterString);
+            csvData filteredLocations = new csvData(locations);
+            failureMessage += checkLocationsCsvFunc(filteredLocations);
+            if (failureMessage.Length > 0)
+            {
+                return failureMessage;
+            }
+
+            Func<csvData, string> checkIdentifier =
+                delegate(csvData locationsCsv)
+                {
                     string unexpectedLocations = string.Empty;
-                    filteredLocations._tableValues.ForEach(delegate(List<string> location)
+                    locationsCsv._tableValues.ForEach(delegate(List<string> location)
                     {
                         if (location[(int)identifierIndex].Trim() != chosenIdentifier)
                         {
                             unexpectedLocations += location.ToString() + "\n";
                         }
                     });
-
                     if (unexpectedLocations != string.Empty)
                     {
                         failureMessage = "Unexpected location identifier returned by GetLocationsByFolderId with Identifier filter.\nLocation data: ";
                         failureMessage += unexpectedLocations;
                     }
-                }
-            }
-            return failureMessage;
+                    return failureMessage;
+                };
+
+            return checkIdentifier(filteredLocations);
         }
     }
 
@@ -1775,7 +1831,7 @@ namespace Tests
 
                     if (ratingTableCsv._headers.Count == 0)
                     {
-                        Suite.AppendToLog("Skipped: No rating table at location");
+                        Suite.AppendToLog("Skipped: No rating curves at location");
                         return "Skipped.";
                     }
                     else
