@@ -229,7 +229,7 @@ namespace API_TestSuite_GUI
                 new GetLocationTest("Create and GetLocation by location Id", this),
                 new CreateAndGetLocationIdTest("Create GetLocationId by location identifier", this),
                 new GetLocationIdTest("Get current LocationId", this),
-                new GetAllLocationsTest("Get all existing locations", this),
+                new GetAllLocationsTest("Get All Locations", this),
                 new SaveFieldVisitTest("Save Field Visit", this),
                 new GetFieldVisitsByLocationTest("Get Field Visits By Location", this),
                 new GetFieldVisitsByLocationAndDateTest("GetFieldVisitsByLocationAndDateTest", this)
@@ -262,7 +262,7 @@ namespace API_TestSuite_GUI
                 new GetLocationsTest("Get Locations by a user specified query string", this),
                 new GetLocationsByFolderIdTest("Get Location By FolderId", this),
                 new GetRatingTableTest("GetRatingTable", this),
-                new GetRatingTableExtensionTest("GetRatingTableExtensionTest", this),
+                new GetRatingTableExtensionTest("GetRatingTableExtensionTest", this, null),
                 new GetTemplateListTest("GetTemplateList", this),
                 new GetReportDataTest("GetReportData", this, null/*logPath.Split('.')[0]*/ )
            };

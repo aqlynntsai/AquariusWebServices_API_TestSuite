@@ -50,7 +50,6 @@ namespace Tests
         {
             // some tests require time-stamps, other don't. The ones that do use this method, others don't.
             createTS = createNewTS();
-            createTime = Suite.ADSclient.GetCurrentServerTime();// changesSince = full TS
             //createTime = createTime.AddHours(Suite.locUTCOff_hrs - Suite.servUTCOff_hrs); // Sets createTime to the location's timezone
 
             append = appendData(ptArray1);
@@ -213,7 +212,8 @@ namespace Tests
                     {
                         val = Suite.AASclient.CreateTimeSeries(Suite.tsName);
                     }
-                    System.Diagnostics.Trace.WriteLine("New TS Created!");
+                    createTime = Suite.ADSclient.GetCurrentServerTime();
+                    System.Diagnostics.Trace.WriteLine("New TS Created at ServerTime = " + createTime.ToString("yyyy-MM-dd HH:mm:ss.fffzzz"));
                     /* Param: HG
                     *  Label: JoshAPItest
                     *  Location: @02AB006
@@ -317,6 +317,7 @@ namespace Tests
                 {
                     val = Suite.AASclient.AppendTimeSeriesFromBytes(createTS, data, "API Test Suite", null);
                 }
+                Suite.AppendToLog("AppendTimeSeriesFromBytes complete time: " + Suite.ADSclient.GetCurrentServerTime().ToString("yyyy-MM-dd HH:mm:ss.fffzzz"));
                 return val;
             }
             catch (Exception ex)
@@ -1759,9 +1760,10 @@ namespace Tests
 
     class GetRatingTableExtensionTest : PublishTestMethod
     {
-        public GetRatingTableExtensionTest(string name, TestSuite suite)
+        public GetRatingTableExtensionTest(string name, TestSuite suite, string label)
             : base(name, suite)
         {
+            _ratingCurveLabel = label;
         }
 
         protected publishServiceMethodDelegate getRatingTableExtensionDelegate(string label)
@@ -1800,9 +1802,11 @@ namespace Tests
             }
             else
             {
-                testPublishServiceAPI(getRatingTableExtensionDelegate("rating"));
+                testPublishServiceAPI(getRatingTableExtensionDelegate(_ratingCurveLabel));
             }
         }
+
+        private string _ratingCurveLabel = string.Empty;
     }
     struct TemplateItem
     {
@@ -2379,18 +2383,29 @@ namespace Tests
         {
             try
             {
+                LocationDTO[] allLocations = new LocationDTO[] { };
                 using (TestSuite.NewContextScope(Suite.AASclient.InnerChannel))
                 {
-                    LocationDTO[] allLocations = Suite.AASclient.GetAllLocations();
+                    allLocations = Suite.AASclient.GetAllLocations();
                 }
+
+                foreach (LocationDTO location in allLocations)
+                {
+                    if (location.Identifier == Suite.tsLoc)
+                    {
+                        ResultStream("Pass");
+                        return;
+                    }
+                }
+                
+                ResultStream("Failed.");
+                LoggerStream("Failed. List of LocationDTO's returned by GetAllLocations did not include current location.");
             }
             catch (Exception ex)
             {
                 ResultStream("Threw Exception");
                 LoggerStream("Threw Exception: " + ex.ToString());
             }
-
-            ResultStream("Pass");
         }
     }
 
@@ -2527,6 +2542,11 @@ namespace Tests
                 {
                     ResultStream("Failed");
                     LoggerStream("Failed: GetLocationId(string Identifier) returned unexpected LocationId");
+                }
+                else
+                {
+                    ResultStream("Pass");
+                    LoggerStream("Pass");
                 }
             }
             catch (Exception ex)
@@ -2741,7 +2761,7 @@ namespace Tests
             }
             else
             {
-                ResultStream("PASS");
+                ResultStream("Pass");
                 LoggerStream("Pass");
             }
         }
@@ -2816,7 +2836,7 @@ namespace Tests
             }
             else
             {
-                ResultStream("PASS");
+                ResultStream("Pass");
                 LoggerStream("Pass");
             }
         }
