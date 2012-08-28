@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <discovery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/disco/">
-  <contractRef ref="http://aidb1/AQUARIUS/AQAcquisitionService.svc?wsdl" docRef="http://aidb1/AQUARIUS/AQAcquisitionService.svc" xmlns="http://schemas.xmlsoap.org/disco/scl/" />
+  <contractRef ref="http://sooke/AQUARIUS/AQAcquisitionService.svc?wsdl" docRef="http://sooke/AQUARIUS/AQAcquisitionService.svc" xmlns="http://schemas.xmlsoap.org/disco/scl/" />
 </discovery>

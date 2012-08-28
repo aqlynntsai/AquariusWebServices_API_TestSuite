@@ -26,12 +26,13 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationFramework" />
@@ -79,6 +80,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
+    <Compile Include="Settings.cs" />
     <Compile Include="Tests.cs" />
     <EmbeddedResource Include="PwBox.resx">
       <DependentUpon>PwBox.cs</DependentUpon>
@@ -384,29 +386,6 @@
     <None Include="Service References\APSreference\AquariusPublishService3.xsd" />
     <None Include="Service References\APSreference\AquariusPublishService4.xsd" />
     <None Include="Service References\APSreference\AquariusPublishService5.xsd" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\AASreference\AQAcquisitionService1.wsdl" />
-    <None Include="Service References\AASreference\AQAcquisitionService55.xsd" />
-    <None Include="Service References\AASreference\AQAcquisitionService56.xsd" />
-    <None Include="Service References\AASreference\AQAcquisitionService57.xsd" />
-    <None Include="Service References\AASreference\AQAcquisitionService58.xsd" />
-    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.EventMonitorInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.HotFolderParser.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.RemoteLocation.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\ADSreference\API_TestSuite_GUI.ADSreference.RemoteTimeSeriesMetadata.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\AASreference\AQAcquisitionService1.disco" />
-    <None Include="Service References\AASreference\AQAcquisitionService59.xsd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

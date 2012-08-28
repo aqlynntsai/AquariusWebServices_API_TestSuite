@@ -135,19 +135,30 @@ namespace API_TestSuite_GUI
 
         #region Helper Methods
 
-        
-
         public void AppendToAppResBox(string msg)
         {
             appResBoxLines[acqLineCount] = msg;
             this.appResultBox.Lines = appResBoxLines;
+            AppendToAcquisitionAPIResultTable(appTestBoxLines[acqLineCount], "acqTestResult", msg);
+
             acqLineCount++;
+        } 
+        
+        public void setAcqTimeResult(string testName, string time)
+        {
+            AppendToResultDataGrid(this.AcqResultGridView, testName, "acqTestTime", time);
+        }
+
+        public void setPubTimeResult(string testName, string time)
+        {
+            AppendToResultDataGrid(this.pubResultGridViewPublish, testName, "pubTestTime", time);
         }
 
         public void AppendToPubResBox(string msg)
         {
             pubResBoxLines[pubLineCount] = msg;
             this.pubResultBox.Lines = pubResBoxLines;
+            AppendToPublishAPIResultTable(pubTestBoxLines[pubLineCount], "pubTestResult", msg);
             pubLineCount++;
         }
 
@@ -195,6 +206,46 @@ namespace API_TestSuite_GUI
         //    pubTimeBoxLines[pubLineCount] = msg;
         //    this.pubTimeBox.Lines = pubTimeBoxLines;
         //}
+
+        int getRowByTestName(DataGridView grid , string testName)
+        {
+            foreach (DataGridViewRow row in grid.Rows)
+            {
+                if (row.Cells[0].Value.ToString() == testName)
+                {
+                    return row.Index;
+                }
+            }
+            return -1;
+        }
+
+        void AppendToAcquisitionAPIResultTable(string testName, string columnName, string result)
+        {
+            AppendToResultDataGrid(this.AcqResultGridView, testName, columnName, result);
+        }
+
+        void AppendToPublishAPIResultTable(string testName, string columnName, string result)
+        {
+            AppendToResultDataGrid(this.pubResultGridViewPublish, testName, columnName, result);
+        }
+
+        void AppendToResultDataGrid(DataGridView grid, string testName, string columnName, string result)
+        {
+            if (!grid.Columns.Contains(columnName))
+            {
+                return;
+            }
+
+            int rowNumber = getRowByTestName(grid, testName);
+            if (rowNumber < 0)
+            {
+                DataGridViewRow testResultRow = new DataGridViewRow();
+                rowNumber = grid.Rows.Add(testResultRow);
+            }
+
+            grid.Rows[rowNumber].Cells[0].Value = testName;
+            grid.Rows[rowNumber].Cells[columnName].Value = result;
+        }
 
         public void PopulateTestListUI()
         {
@@ -251,14 +302,14 @@ namespace API_TestSuite_GUI
                 new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 1", this, 2, csv1+csv2, null, "2010-07-31T01:00:00.000", "2010-07-31T01:05:00.000", "2000-01-01T00:00:00.000", null),
                 new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 2", this, 6, csv1+csv2, null, null, null, null, null),
                 new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 3", this, 6, csv1+csv2, null, null, null, null, "1900-01-01T00:00:00.000"), //This returns all points appended apparently...
-                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 4", this, 0, csv1+csv2, null, null, "2010-07-31T01:05:00.000", "2010-07-31T01:00:00.000"),
+                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 4", this, 0, csv1+csv2, null, "2010-07-31T01:05:00.000", "2010-07-31T01:00:00.000", null, null),
                 // Note that Test 5 needs to be run within 30 minutes of starting the APITester
                 // and the ChangesSince field imprecisely (TODO) uses the time of the client, but the time zone of the server
                 new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 5", this, 0, csv1+csv2, null, null, "2010-07-31T01:00:00.000", "2010-07-31T01:05:00.000", DateTime.Now.AddMinutes(30).ToString(@"yyyy-MM-ddTHH:mm:ss.fff")),
-                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 6", this, 3, csv1, csv2, null, null, null, null, null),
-                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 7", this, 1, csv1, csv2, null, "2010-07-31T01:10:00.000", null, null, null),
+                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 6", this, 3, csv1, csv2, null, null, null, null),
+                new GetTimeSeriesDataCustomTest("Get Time Series Data Custom Test 7", this, 1, csv1, csv2, "2010-07-31T01:10:00.000", null, null, null),
                 new GetTimeSeriesRawDataAllTest("Get All Time Series Raw Data", this),
-                new GetTimeSeriesDataResampledTest("Get All Time Series Data Resampled", this, SinceWhen),
+                new GetTimeSeriesDataResampledTest("Get All Time Series Data Resampled", this, "2010-07-31T01:00:00.000"),
                 new GetLocationsTest("Get Locations by a user specified query string", this),
                 new GetLocationsByFolderIdTest("Get Location By FolderId", this),
                 new GetRatingTableTest("GetRatingTable", this),
@@ -490,8 +541,9 @@ namespace API_TestSuite_GUI
                     progBar.PerformStep();
                     duration = pt.getDuration();
                     AppendToAcqTimeBox(duration, acqTimeResults);
-                    AppendToLog(String.Format("Time to complete: {0} \n", duration));
+                    setAcqTimeResult(atm.Name, duration);
 
+                    AppendToLog(String.Format("Time to complete: {0} \n", duration));
                 }
                 i++;
             }
@@ -510,6 +562,8 @@ namespace API_TestSuite_GUI
                     progBar.PerformStep();
                     duration = pt.getDuration();
                     AppendToPubTimeBox(duration, pubTimeResults);
+                    setPubTimeResult(ptm.Name, duration);
+
                     AppendToLog(String.Format("Time to complete: {0} \n", duration));
                 }
                 i++;
@@ -746,6 +800,8 @@ namespace API_TestSuite_GUI
                 }
                 appResultBox.ResetText();
                 appTestBox.Lines = appTestBoxLines;
+
+                AcqResultGridView.Rows.Clear();
             }
             else
             {
@@ -769,6 +825,8 @@ namespace API_TestSuite_GUI
                 }
                 pubResultBox.ResetText();
                 pubTestBox.Lines = pubTestBoxLines;
+
+                pubResultGridViewPublish.Rows.Clear();
             }
             #endregion
         }
@@ -781,6 +839,8 @@ namespace API_TestSuite_GUI
 
                 appTestBox.Lines = AcquisitionTestNames;
                 pubTestBox.Lines = PublishTestNames;
+                appTestBoxLines = AcquisitionTestNames;
+                pubTestBoxLines = PublishTestNames;
 
                 for (int i = 0; i < numTests; i++)
                 {
@@ -792,7 +852,6 @@ namespace API_TestSuite_GUI
                 {
                     pubTestSelectBox.SetItemChecked(i, true);
                     PublishTestList[i].Check();
-
                 }
 
             }
@@ -1251,7 +1310,8 @@ namespace API_TestSuite_GUI
                 pubResBoxLines = new string[pubTestBox.Lines.Length];
 
                 runTests();
-                suiteTabControl.SelectedTab = testResTab;
+                //suiteTabControl.SelectedTab = testResTab;
+                suiteTabControl.SelectedTab = ResultsTable;
                 suiteRunning = false;
             }
             catch (Exception ex)

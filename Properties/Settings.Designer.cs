@@ -25,7 +25,7 @@ namespace API_TestSuite_GUI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("\"\"")]
         public string Server {
             get {
                 return ((string)(this["Server"]));
@@ -37,6 +37,7 @@ namespace API_TestSuite_GUI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool GetAllLocations {
             get {
                 return ((bool)(this["GetAllLocations"]));

@@ -63,7 +63,6 @@ namespace Tests
         {
             // some tests require time-stamps, other don't. The ones that do use this method, others don't.
             createTS = createNewTS();
-            createTime = Suite.ADSclient.GetCurrentServerTime();// DateTime.Now;      // changesSince = full TS
             //createTime = createTime.AddHours(Suite.locUTCOff_hrs - Suite.servUTCOff_hrs); // Sets createTime to the location's timezone
 
             appendResult = appendData2(ptArray1);
@@ -290,7 +289,11 @@ namespace Tests
                     {
                         val = Suite.AASclient.CreateTimeSeries2(parameters._parentId, parameters._label, parameters._comments, parameters._description, parameters._parameter, parameters._utcOffsetInMin, parameters._unit, parameters._maxGaps);
                     }
-                    System.Diagnostics.Trace.WriteLine("New TS Created!");
+
+                    createTime = Suite.ADSclient.GetCurrentServerTime();
+                    string msg = "CreateTimeSeries2 complete at Server Time: " + createTime.ToString("yyyy-MM-dd HH:mm:ss.fffzzz");
+                    Suite.AppendToLog(msg);
+                    System.Diagnostics.Trace.WriteLine(msg);
                 }
                 return val;
             }
@@ -317,7 +320,14 @@ namespace Tests
                 {
                     val = Suite.AASclient.AppendTimeSeriesFromBytes(createTS, data, "API Test Suite", null);
                 }
-                Suite.AppendToLog("AppendTimeSeriesFromBytes complete time: " + Suite.ADSclient.GetCurrentServerTime().ToString("yyyy-MM-dd HH:mm:ss.fffzzz"));
+
+                string msg = String.Format("\n" + "AppendTimeSeriesFromBytes: ");
+                
+                appendTime = Suite.ADSclient.GetCurrentServerTime();
+                msg += String.Format("{0} points appended at Server Time: {1}", val, appendTime.ToString("yyyy-MM-dd HH:mm:ss.fffzzz"));
+                Suite.AppendToLog(msg);
+                System.Diagnostics.Trace.WriteLine(msg);
+                
                 return val;
             }
             catch (Exception ex)
@@ -384,7 +394,7 @@ namespace Tests
         protected long createTS; // A.K.A. created TimeSeries' ID
         protected int append;
         protected AppendResult appendResult;
-        protected DateTime createTime, halfTime;
+        protected DateTime createTime, halfTime, appendTime;
 
         public bool IsChecked;
     }
@@ -810,6 +820,57 @@ namespace Tests
             base.RunTest();
             GetDataSetsList_changesSinceTime_test();
         }
+
+        string[] getOutputDataRows(string rawOutput)
+        {
+            string[] delims = { "\r\n" };
+            return rawOutput.Split(delims, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        Dictionary<string, int> getColumnHeaderDictionary(string headerRow)
+        {
+            Dictionary<string, int> columnsIndexDictionary = new Dictionary<string, int>();
+            string[] headers = headerRow.Split(',');
+            for (int index = 0; index < headers.Length; ++index)
+            {
+                columnsIndexDictionary.Add(headers[index], index);
+            }
+            return columnsIndexDictionary;
+        }
+
+        List<string> tryFindModifiedTime(string dataSetId, string outputData)
+        {
+            return tryQueryDataSet(dataSetId, "LastModified", outputData);
+        }
+
+        List<string> tryQueryDataSet(string dataSetId, string valueName, string outputData)
+        {
+            string[] linesplitDataSet = getOutputDataRows(outputData);
+            Dictionary<string, int> columnsIndexDictionary = getColumnHeaderDictionary(linesplitDataSet[0]);
+
+            int colIndexDataId = -1;
+
+            List<string> dataList = new List<string>(linesplitDataSet);
+            dataList.RemoveAt(0);
+
+            List<string> modifiedTimes = new List<string>();
+            if (columnsIndexDictionary.TryGetValue("DataId", out colIndexDataId))
+            {
+                foreach (string line in dataList)
+                {
+                    if (line.Split(',')[colIndexDataId].Contains(dataSetId))
+                    {
+                        int colIndexLastModified = -1;
+                        if (columnsIndexDictionary.TryGetValue(valueName, out colIndexLastModified))
+                        {
+                            modifiedTimes.Add(line.Split(',')[colIndexLastModified]);
+                        }
+                    }
+                }
+            }
+            return modifiedTimes;
+        }
+
         private void GetDataSetsList_changesSinceTime_test()
         {
             LoggerStream("GetDataSetsList(changesSinceTime): ");
@@ -817,8 +878,6 @@ namespace Tests
             string changesSince = "";
 
             initSuite();
-            changesSince = createTime.ToString("yyyy-MM-dd HH:mm:ss.fffzzz");
-            appendData(ptArray2);
             try
             {
                 string dataSetList = string.Empty;
@@ -826,14 +885,26 @@ namespace Tests
                 {
                     dataSetList = Suite.APSclient.GetDataSetsList(Suite.tsLoc, null);
                 }
+                string newDataSetId = Suite.tsParam + "." + Suite.tsLabel + "@" + Suite.tsLoc;
+
+                Thread.Sleep(2000);
+                List<string> modifiedTimes = tryFindModifiedTime(newDataSetId, dataSetList);
+                if(modifiedTimes.Count > 0)
+                {
+                    changesSince = modifiedTimes[modifiedTimes.Count-1];
+                }
+
+                appendData(ptArray2);
+                Thread.Sleep(2000);
+
                 string dataSetListSince = string.Empty;
                 using (TestSuite.NewContextScope(Suite.APSclient.InnerChannel))
                 {
                     dataSetListSince = Suite.APSclient.GetDataSetsList(Suite.tsLoc, changesSince);
                 }
+                string[] linesplitDataSet = getOutputDataRows(dataSetListSince);
 
-                string[] delims = { "\r\n" };
-                string[] linesplitDataSet = dataSetListSince.Split(delims, StringSplitOptions.RemoveEmptyEntries);
+                linesplitDataSet = getOutputDataRows(dataSetListSince);
 
                 if (linesplitDataSet.Length < 2)
                 {
@@ -842,8 +913,48 @@ namespace Tests
                     return;
                 }
 
-                char numPtsChanged = linesplitDataSet[1].Split(',')[12][0];
-                if (numPtsChanged == '6')
+                DateTime changesSinceTimeStamp = DateTime.Parse(changesSince);
+                modifiedTimes = tryFindModifiedTime("", dataSetListSince);
+                List<string> incorrectTimes = new List<string>();
+
+                modifiedTimes.ForEach(delegate(string time)
+                {
+                    DateTime timeStamp = new DateTime();
+                    if (!DateTime.TryParse(time, out timeStamp) || timeStamp < changesSinceTimeStamp)
+                    {
+                        incorrectTimes.Add(time);
+                    }
+                }
+                );
+
+                if (incorrectTimes.Count > 0)
+                {
+                    ResultStream("FAIL");
+                    string msg = "FAIL - returned dataSet contains incorrect modified time stamps: " + incorrectTimes.ToString();
+                    msg += "\n API Output:\n" + dataSetListSince;
+                    LoggerStream(string.Format(msg));
+                    return;
+                }
+
+                Dictionary<string, int> columnsIndexDictionary = getColumnHeaderDictionary(linesplitDataSet[0]);
+                int colIndexTotalSamples = -1;
+                if (!columnsIndexDictionary.TryGetValue("TotalSamples", out colIndexTotalSamples))
+                {
+                    ResultStream("FAIL");
+                    string msg = "FAIL - return data does not contain expected column headers.\n";
+                    msg += "API Output:\n" + dataSetListSince;
+                    LoggerStream(string.Format(msg));
+                    return;
+                }
+
+                List<string> totalSamplesList = tryQueryDataSet(newDataSetId, "TotalSamples", dataSetListSince);
+                string numPtsChanged = "";
+                if (totalSamplesList.Count > 0)
+                {
+                    numPtsChanged = totalSamplesList[totalSamplesList.Count - 1].Trim();
+                }
+
+                if (numPtsChanged == "6")
                 {
                     ResultStream("pass");
                     LoggerStream(string.Format("pass - returned {0} points", numPtsChanged));
@@ -851,7 +962,9 @@ namespace Tests
                 else
                 {
                     ResultStream("FAIL");
-                    LoggerStream(string.Format("FAIL - returned {0} points, expected 6 points", numPtsChanged));
+                    string msg = string.Format("FAIL - returned dataSet containing {0} points, expected 6 points", numPtsChanged);
+                    msg += "\n API Output:\n" + dataSetListSince;
+                    LoggerStream(string.Format(msg));
                 }
             }
             catch (Exception e)
@@ -880,6 +993,24 @@ namespace Tests
             _changesSinceTime = changesSinceTime;
             _asAtTime = asAtTime;
         }
+        private static string PrintPossibleNullParam(string param)
+        {
+            if(param == null)
+            {
+                return "null";
+            }
+            return param.ToString();
+        }
+
+        public override string ToString()
+        {
+ 	         return String.Format("\nPublish View: {0} \nqueryFromTime: {1} \nqueryToTime: {2} \nchangesSinceTime: {3} \nasAtTime: {4} \n",
+                 PrintPossibleNullParam(_publishView), 
+                 PrintPossibleNullParam(_queryFromTime),
+                 PrintPossibleNullParam(_queryToTime), 
+                 PrintPossibleNullParam(_changesSinceTime), 
+                 PrintPossibleNullParam(_asAtTime));
+        }
     }
 
     public class GetTimeSeriesDataTest : PublishTestMethod
@@ -887,12 +1018,14 @@ namespace Tests
         protected delegate string GetTimeSeriesDataAPI(GetTimeSeriesDataQuery query);
         protected GetTimeSeriesDataAPI _queryAPI;
         protected string _appendData;
+        protected string _expectedData;
 
         protected GetTimeSeriesDataTest(string name, TestSuite suite, string appendDataString, GetTimeSeriesDataAPI queryAPI)
             : base(name, suite)
         {
             _queryAPI = queryAPI;
             _appendData = appendDataString;
+            _expectedData = _appendData;
         }
 
         public GetTimeSeriesDataTest(string name, TestSuite suite, string appendDataString)
@@ -902,7 +1035,11 @@ namespace Tests
                 appendDataString,
                 delegate(GetTimeSeriesDataQuery query)
                 {
-                    return suite.APSclient.GetTimeSeriesData(query._dataId, query._publishView, query._queryFromTime, query._queryToTime, query._changesSinceTime, query._asAtTime);
+                    string result = suite.APSclient.GetTimeSeriesData(query._dataId, query._publishView, query._queryFromTime, query._queryToTime, query._changesSinceTime, query._asAtTime);
+                    string logMsg = String.Format("GetTimeSeriesData API call with params: \n");
+                    logMsg += query.ToString();
+                    Suite.AppendToLog(logMsg);
+                    return result;
                 }
             )
         {
@@ -917,7 +1054,7 @@ namespace Tests
         protected virtual void RunGetTimeSeriesDataTest()
         {
             System.Diagnostics.Trace.WriteLine(Name);
-            initializeTimeSeries();
+            setupTimeSeries();
 
             try
             {
@@ -935,19 +1072,22 @@ namespace Tests
             string input = string.Empty;
             GetTimeSeriesDataQuery query = getQuery(null);
             input = getTimeSeriesData(query);
-            evaluateSuccess(stringParse(input, 0), stringParse(_appendData, 1));
+            evaluateSuccess(input, _expectedData);
         }
 
-        public virtual void initializeTimeSeries(string appendDataString)
+        protected virtual void initializeTimeSeries(string appendDataString)
         {
             System.Diagnostics.Trace.WriteLine(Name);
             LoggerStream(Name);
 
             createTS = createNewTS2();
             appendData(Encoding.ASCII.GetBytes(appendDataString));
+            Thread.Sleep(2000);
+
+            halfTime = Suite.ADSclient.GetCurrentServerTime();// asAt = 1st half TS; changesSince = 2nd half TS
         }
 
-        protected virtual void initializeTimeSeries()
+        protected virtual void setupTimeSeries()
         {
             initializeTimeSeries(_appendData);
         }
@@ -962,25 +1102,6 @@ namespace Tests
             string result = dt.ToString("yyyy-MM-dd") + "T" + dt.ToString("HH:mm:ss.fffzzz") + sign + Math.Abs(utcHrs).ToString("#00") + ":00";
             return result;
         }
-        protected string getDate(string date, int type)
-        {
-            string changesSince = null;
-            switch (type)
-            {
-                case 0:
-                    goto default;
-                case 1:
-                    changesSince = date;
-                    System.Diagnostics.Trace.WriteLine("Date: " + changesSince);
-                    break;
-                default:
-                    changesSince = halfTime.ToString("yyyy-MM-dd HH:mm:sszzz");
-                    System.Diagnostics.Trace.WriteLine("Date: " + changesSince);
-                    break;
-            }
-            return changesSince ?? halfTime.ToString("yyyy-MM-dd HH:mm:sszzz");
-        }
-
         protected virtual GetTimeSeriesDataQuery getQuery(string asAt)
         {
             string input = string.Empty;
@@ -1001,18 +1122,30 @@ namespace Tests
             return resultString;
         }
 
-        protected virtual void evaluateSuccess(string[] actual, string[] expected)
+        protected virtual void evaluateSuccess(string actual, string expected)
+        {
+            evaluateParsed(stringParse(actual, 0), stringParse(expected, 1));
+        }
+
+        protected virtual void evaluateParsed(string[] actual, string[] expected)
         {
             int passCount = 0;
             bool lengthPass = true;
             bool[] result = new bool[5];
             string allResult = "";
 
+            if (expected.Length % 5 != 0)
+            {
+                ResultStream("FAIL");
+                LoggerStream(base.Name + ": evaluateParsed called with incorrect expected Time Series data format");
+                return;
+            }
+
             if (expected.Length != actual.Length)
             {
                 ResultStream("FAIL");
                 lengthPass = false;
-                LoggerStream(string.Format("FAIL - Returned {0} points, expected {1} points", actual.Length, expected.Length));
+                LoggerStream(string.Format("FAIL - Returned {0} points, expected {1} points", actual.Length / 5, expected.Length / 5));
             }
             else
             {
@@ -1103,7 +1236,7 @@ namespace Tests
         public GetTimeSeriesDataAllTest(string name, TestSuite suite) : base(name, suite, csv1 + csv2) { }
     }
 
-    public class GetTimeSeriesDataResampledTest : GetTimeSeriesDataChangesSinceTest
+    public class GetTimeSeriesDataResampledTest : GetTimeSeriesDataTest
     {
         protected static string csv1WithIntermediatePoints =
                                         @"2010-07-31 01:02:50,4.89599990844727,192,10,1,3
@@ -1111,19 +1244,18 @@ namespace Tests
                                          ";
 
         public GetTimeSeriesDataResampledTest(string name, TestSuite suite, string anchorTime)
-            : base(name, suite, anchorTime)
+            : base(name, suite, csv1)
         {
 
             _queryAPI = delegate(GetTimeSeriesDataQuery query)
                 {
-                    return suite.APSclient.GetTimeSeriesDataResampled(query._dataId, query._publishView, query._queryFromTime, query._queryToTime, 5, query._changesSinceTime);
+                    return suite.APSclient.GetTimeSeriesDataResampled(query._dataId, query._publishView, query._queryFromTime, query._queryToTime, 5, anchorTime);
                 };
         }
 
-        protected override void initializeTimeSeries()
+        protected override void setupTimeSeries()
         {
-            base._appendData = csv1;
-            base.initializeTimeSeries();
+            base.setupTimeSeries();
             appendData(csv1WithIntermediatePoints);
         }
     }
@@ -1202,9 +1334,10 @@ namespace Tests
             toTime = ToTime;
         }
 
-        protected override void initializeTimeSeries()
+        protected override void setupTimeSeries()
         {
             initSuite();
+            Thread.Sleep(2000);
             appendData(Encoding.ASCII.GetBytes(_appendData));
         }
 
@@ -1228,12 +1361,12 @@ namespace Tests
                 return;
             }
 
-            if (fromTime == string.Empty)
+            if (fromTime == null || fromTime == string.Empty)
             {
                 fromTime = String.Format("{0}{1}", "2010-07-31T01:15:00.000", locTimezoneOffset);
             }
 
-            if (toTime == string.Empty)
+            if (toTime == null || toTime == string.Empty)
             {
                 toTime = String.Format("{0}{1}", "2010-07-31T01:25:00.000", locTimezoneOffset);
             }
@@ -1246,13 +1379,15 @@ namespace Tests
             System.Diagnostics.Trace.WriteLine("Get TS data fromTime toTime, type {0}: ", type.ToString());
             LoggerStream(String.Format("GetTimeSeriesData(fromTime, toTime), type {0}: ", type.ToString())); //Semantic change
 
-            initializeTimeSeries();
+            setupTimeSeries();
 
             try
             {
                 string input = string.Empty;
                 GetTimeSeriesDataQuery query = getQuery(null);
                 query._queryFromTime = fromTime;
+                query._queryToTime = toTime;
+
                 input = getTimeSeriesData(query);
 
                 switch (type)
@@ -1275,9 +1410,7 @@ namespace Tests
                         #endregion
                         break;
                     default:
-                        string[] actual = stringParse(input, 0);
-                        string[] expected = stringParse(csv2, 1);
-                        evaluateSuccess(actual, expected);
+                        evaluateSuccess(input, csv2);
 
                         break;
                 }
@@ -1306,20 +1439,25 @@ namespace Tests
         private string asWhen;
         private int type;
 
-        public override void initializeTimeSeries(string appendDataString)
+        protected override void setupTimeSeries()
         {
             initSuite();
-            appendData(Encoding.ASCII.GetBytes(appendDataString));
+            Thread.Sleep(2000);
+            appendData(Encoding.ASCII.GetBytes(_appendData));
         }
 
         protected override void RunGetTimeSeriesDataTest()
         {
             try
             {
-                System.Diagnostics.Trace.WriteLine(String.Format("Get TS data AS OF {0}, type {1}", asWhen, type)); //same
-                Suite.writeLog.Append(String.Format("GetTimeSeriesData(asAtTime): Time: {0} Type: {1}", asWhen, type));
+                string logMessage = String.Format("Get TS data AS OF {0}, type {1}", asWhen, type);
+                logMessage += String.Format("\n Location timeZone offset = " + Suite.locUTCOff_hrs);
+                logMessage += String.Format("\n Server timeZone offset = " + Suite.servUTCOff_hrs);
 
-                initializeTimeSeries();
+                System.Diagnostics.Trace.WriteLine(logMessage); //same
+                Suite.writeLog.Append(String.Format(logMessage));
+
+                setupTimeSeries();
 
                 string asAt = String.Empty;
                 string input = String.Empty;
@@ -1334,14 +1472,14 @@ namespace Tests
                         query = getQuery(asWhen);
                         input = getTimeSeriesData(query);
                         System.Diagnostics.Trace.WriteLine("Date: " + asAt);
-                        evaluateSuccess(stringParse(input, 0), stringParse(csv1 + csv2, 1));
+                        evaluateSuccess(input,csv1 + csv2);
                         break;
                     default:
                         asAt = halfTime.ToString("yyyy-MM-dd HH:mm:sszzz");
                         query = getQuery(halfTime.ToString("yyyy-MM-dd HH:mm:sszzz"));
                         input = getTimeSeriesData(query);
                         System.Diagnostics.Trace.WriteLine("Date: " + asAt);
-                        evaluateSuccess(stringParse(input, 0), stringParse(csv1, 1));
+                        evaluateSuccess(input, csv1);
                         break;
                 }
 
@@ -1366,6 +1504,14 @@ namespace Tests
         {
             GetTimeSeriesData_changesSinceTime_test(fromWhen, 0);
         }
+
+        protected override void setupTimeSeries()
+        {
+            initSuite();
+            Thread.Sleep(2000);
+            appendData(Encoding.ASCII.GetBytes(_appendData));
+        }
+
         /// <summary>
         /// <para>Performs GetTimeSeriesData with changesSince parameter, based on input:
         /// case 0 (def): Appends two csvs, evaluates changesSince between the appends
@@ -1373,13 +1519,17 @@ namespace Tests
         /// </summary>
         /// <param name="date"></param>
         /// <param name="type"></param>
-        private void GetTimeSeriesData_changesSinceTime_test(string date, int type)
+        private void GetTimeSeriesData_changesSinceTime_test(string changesSince, int type)
         {
             System.Diagnostics.Trace.WriteLine("Get TS data SINCE, type " + type.ToString() + ": ");
             LoggerStream(Name + ", type: " + type.ToString() + ": ");
-            initializeTimeSeries();
+            setupTimeSeries();
 
-            string changesSince = getDate(date, type);
+            if (changesSince == null || changesSince == string.Empty)
+            {
+                changesSince = halfTime.ToString("yyyy-MM-dd HH:mm:sszzz");
+            }
+
             LoggerStream(String.Format("Changes since parameter: {0}", changesSince));
             try
             {
@@ -1388,19 +1538,7 @@ namespace Tests
                 query._changesSinceTime = changesSince;
                 input = getTimeSeriesData(query);
                 System.Diagnostics.Trace.WriteLine("From APS: " + input);
-
-                string[] actual = stringParse(input, 0);
-                string[] expected = stringParse(_appendData,1);
-
-                if (expected.Length != actual.Length)
-                {
-                    ResultStream("FAIL");
-                    LoggerStream(string.Format("FAIL - Returned {0} points, expected {1} points", actual.Length, expected.Length));
-                }
-                else
-                {
-                    evaluateSuccess(actual, expected);
-                }
+                evaluateSuccess(input, _appendData);
             }
             catch (Exception e)
             {
@@ -1418,17 +1556,17 @@ namespace Tests
         /// <summary>
         /// Required params: string name, TestSuite Suite, int NumPtsExpected, string Data1. //// Optional params: string publishView, queryFromTime, queryToTime, changesSinceTime, asAtTime, Data2. //// If Data2 is specified, asAtTime will be ignored and the interim time between appends will be used.
         /// </summary>
-        public GetTimeSeriesDataCustomTest(string name, TestSuite suite, int numPointsExpected, string data, string data2, params string[] args)
+        public GetTimeSeriesDataCustomTest(string name, TestSuite suite, int numPointsExpected, string data, string data2, string from, string to, string changesSince, string asAt)
             : base(name, suite, data)
         {
             NumPtsExpected = numPointsExpected;
             Data = data;
             Data2 = data2;
-            if (args.Length > 0) publishView = args[0];
-            if (args.Length > 1) queryFromTime = args[1];
-            if (args.Length > 2) queryToTime = args[2];
-            if (args.Length > 3) changesSinceTime = args[3];
-            if (args.Length > 4) asAtTime = args[4];
+
+            queryFromTime = from;
+            queryToTime = to;
+            changesSinceTime = changesSince;
+            asAtTime = asAt;
         }
 
         /// <summary>
@@ -1449,12 +1587,12 @@ namespace Tests
         }
         private void convertToUTC(ref string dt)
         {
-            if (!String.IsNullOrEmpty(dt) && !dt.EndsWith(addUTCOffset(Suite.locUTCOff_hrs)))
+            if (!String.IsNullOrEmpty(dt) && !dt.EndsWith(appendUTCOffsetString(Suite.locUTCOff_hrs)))
             {
                 int UTCPos = isDateTimeInUTC(dt);
                 if (UTCPos != 0)
                     dt = dt.Remove(UTCPos);
-                dt += addUTCOffset(Suite.locUTCOff_hrs);
+                dt += appendUTCOffsetString(Suite.locUTCOff_hrs);
 
             }
         }
@@ -1477,7 +1615,7 @@ namespace Tests
             }
         }
 
-        protected string addUTCOffset(float UTC)
+        protected string appendUTCOffsetString(float UTC)
         {
             string result = "";
             if (UTC > 0) result += "+";
@@ -1507,9 +1645,6 @@ namespace Tests
         {
             System.Diagnostics.Trace.WriteLine(Name);
             LoggerStream(Name);
-            LoggerStream(String.Format(
-                "Params: \nPublish View: {0} \nqueryFromTime: {1} \nqueryToTime: {2} \nchangesSinceTime: {3} \nasAtTime: {4} \nData2: {5}",
-                publishView ?? "null", queryFromTime ?? "null", queryToTime ?? "null", changesSinceTime ?? "null", asAtTime ?? "null", Data2 ?? "null"));
 
             string input = "";
 
@@ -1518,7 +1653,7 @@ namespace Tests
             if (!String.IsNullOrEmpty(Data2))
             {
                 appendData(Encoding.ASCII.GetBytes(Data2));
-                asAtTime = halfTime.ToString(@"yyyy-MM-ddTHH:mm:ss.fff") + addUTCOffset(Suite.locUTCOff_hrs);
+                asAtTime = halfTimeWithLocationTimeZoneOffset.ToString(@"yyyy-MM-ddTHH:mm:ss.fff") + appendUTCOffsetString(Suite.locUTCOff_hrs);
             }
 
             GetTimeSeriesDataQuery query = getQuery();
@@ -1541,25 +1676,26 @@ namespace Tests
             }
         }
 
-        public override void initializeTimeSeries(string appendDataString)
+        protected DateTime createTimeWithLocationTimeZoneOffset
         {
-            // some tests require time-stamps, other don't. The ones that do use this method, others don't.
-            createTS = createNewTS();
-            createTime = Suite.ADSclient.GetCurrentServerTime();// DateTime.Now;      // changesSince = full TS
-            createTime = createTime.AddHours(Suite.locUTCOff_hrs - Suite.servUTCOff_hrs); // Sets createTime to the location's timezone
-
-            append = appendData(Encoding.ASCII.GetBytes(appendDataString));
-
-            Thread.Sleep(2000);
-
-            halfTime = Suite.ADSclient.GetCurrentServerTime(); //DateTime.Now;        // asAt = 1st half TS; changesSince = 2nd half TS
-            halfTime = halfTime.AddHours(Suite.locUTCOff_hrs - Suite.servUTCOff_hrs); // Sets halfTime to the location's timezone
+            get
+            {
+                return createTime.AddHours(Suite.locUTCOff_hrs - Suite.servUTCOff_hrs); // Sets createTime to the location's timezone
+            }
         }
 
+        protected DateTime halfTimeWithLocationTimeZoneOffset
+        {
+            get
+            {
+                return halfTime.AddHours(Suite.locUTCOff_hrs - Suite.servUTCOff_hrs); // Sets halfTime to the location's timezone
+            }
+        }
         private int NumPtsExpected;
         private string Data;
         private string Data2;
-        private string publishView, queryFromTime, queryToTime, changesSinceTime, asAtTime;
+        private string publishView = "Public";
+        private string queryFromTime, queryToTime, changesSinceTime, asAtTime;
     }
 
     public class GetLocationsTest : PublishTestMethod
@@ -1672,23 +1808,7 @@ namespace Tests
             }
         }
 
-        protected string checkLocationsCsv(csvData locationsCsv, Func<csvData, string> tableContentValidation)
-        {
-            string failureMessage = locationsCsv.checkHeaders(ExpectedHeader.Split(','));
-            if (failureMessage != string.Empty)
-            {
-                return failureMessage;
-            }
-
-            if (locationsCsv._tableValues.Count == 0)
-            {
-                return "No locations found in folder";
-            }
-
-            return tableContentValidation(locationsCsv);
-        }
-
-        Func<csvData, string> checkLocationsCsvFunc = delegate(csvData locationsCsv)
+        Func<csvData, string> checkLocationsCsvFormat = delegate(csvData locationsCsv)
         {
             string failureMessage = locationsCsv.checkHeaders(ExpectedHeader.Split(','));
             if (failureMessage != string.Empty)
@@ -1728,7 +1848,7 @@ namespace Tests
 
             locations = getLocationsByFolderId(Convert.ToInt32(id), null);
             csvData unfilteredLocations = new csvData(locations);
-            failureMessage += checkLocationsCsvFunc(unfilteredLocations);
+            failureMessage += checkLocationsCsvFormat(unfilteredLocations);
             if (failureMessage.Length > 0)
             {
                 return failureMessage;
@@ -1748,7 +1868,7 @@ namespace Tests
 
             locations = getLocationsByFolderId(Convert.ToInt32(id), filterString);
             csvData filteredLocations = new csvData(locations);
-            failureMessage += checkLocationsCsvFunc(filteredLocations);
+            failureMessage += checkLocationsCsvFormat(filteredLocations);
             if (failureMessage.Length > 0)
             {
                 return failureMessage;

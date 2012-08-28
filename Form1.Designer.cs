@@ -46,19 +46,17 @@
             this.pubTestSelectBox = new System.Windows.Forms.CheckedListBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.appTestSelectBox = new System.Windows.Forms.CheckedListBox();
-            this.testResTab = new System.Windows.Forms.TabPage();
-            this.label12 = new System.Windows.Forms.Label();
-            this.totalTimeBox = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.pubTimeBox = new System.Windows.Forms.TextBox();
-            this.acqTimeBox = new System.Windows.Forms.TextBox();
-            this.pubResultLabel = new System.Windows.Forms.Label();
-            this.pubResultBox = new System.Windows.Forms.TextBox();
-            this.pubTestBox = new System.Windows.Forms.TextBox();
-            this.appResultLabel = new System.Windows.Forms.Label();
-            this.appTestBox = new System.Windows.Forms.TextBox();
-            this.appResultBox = new System.Windows.Forms.TextBox();
-            this.resBoxLabel = new System.Windows.Forms.Label();
+            this.ResultsTable = new System.Windows.Forms.TabPage();
+            this.label16 = new System.Windows.Forms.Label();
+            this.pubResultGridViewPublish = new System.Windows.Forms.DataGridView();
+            this.pubTestName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.pubTestResult = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.pubTestTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.label15 = new System.Windows.Forms.Label();
+            this.AcqResultGridView = new System.Windows.Forms.DataGridView();
+            this.acqTestName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.acqTestResult = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.acqTestTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.userDefTab = new System.Windows.Forms.TabPage();
             this.label7 = new System.Windows.Forms.Label();
             this.customDelButton = new System.Windows.Forms.Button();
@@ -123,6 +121,19 @@
             this.contLabelBox = new System.Windows.Forms.TextBox();
             this.contLocLabel = new System.Windows.Forms.Label();
             this.contLabelLabel = new System.Windows.Forms.Label();
+            this.testResTab = new System.Windows.Forms.TabPage();
+            this.label12 = new System.Windows.Forms.Label();
+            this.totalTimeBox = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.pubTimeBox = new System.Windows.Forms.TextBox();
+            this.acqTimeBox = new System.Windows.Forms.TextBox();
+            this.pubResultLabel = new System.Windows.Forms.Label();
+            this.pubResultBox = new System.Windows.Forms.TextBox();
+            this.pubTestBox = new System.Windows.Forms.TextBox();
+            this.appResultLabel = new System.Windows.Forms.Label();
+            this.appTestBox = new System.Windows.Forms.TextBox();
+            this.appResultBox = new System.Windows.Forms.TextBox();
+            this.resBoxLabel = new System.Windows.Forms.Label();
             this.openLogButton = new System.Windows.Forms.Button();
             this.srvSet = new System.Windows.Forms.Button();
             this.chooseFolderBox = new System.Windows.Forms.FolderBrowserDialog();
@@ -139,11 +150,14 @@
             this.suiteTab.SuspendLayout();
             this.suiteTabControl.SuspendLayout();
             this.testSelTab.SuspendLayout();
-            this.testResTab.SuspendLayout();
+            this.ResultsTable.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pubResultGridViewPublish)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.AcqResultGridView)).BeginInit();
             this.userDefTab.SuspendLayout();
             this.contAppendTest.SuspendLayout();
             this.contAppPanel.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.testResTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBoxHost
@@ -168,7 +182,7 @@
             // 
             this.startTestButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.startTestButton.Enabled = false;
-            this.startTestButton.Location = new System.Drawing.Point(294, 503);
+            this.startTestButton.Location = new System.Drawing.Point(342, 503);
             this.startTestButton.Name = "startTestButton";
             this.startTestButton.Size = new System.Drawing.Size(97, 23);
             this.startTestButton.TabIndex = 5;
@@ -181,7 +195,7 @@
             this.statusLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.statusLabel.AutoSize = true;
             this.statusLabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.statusLabel.Location = new System.Drawing.Point(10, 625);
+            this.statusLabel.Location = new System.Drawing.Point(21, 693);
             this.statusLabel.Name = "statusLabel";
             this.statusLabel.Size = new System.Drawing.Size(42, 13);
             this.statusLabel.TabIndex = 14;
@@ -192,7 +206,7 @@
             this.statusInfo.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.statusInfo.AutoSize = true;
             this.statusInfo.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.statusInfo.Location = new System.Drawing.Point(65, 625);
+            this.statusInfo.Location = new System.Drawing.Point(76, 693);
             this.statusInfo.MinimumSize = new System.Drawing.Size(250, 0);
             this.statusInfo.Name = "statusInfo";
             this.statusInfo.Size = new System.Drawing.Size(250, 13);
@@ -208,7 +222,7 @@
             // progBar
             // 
             this.progBar.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.progBar.Location = new System.Drawing.Point(13, 644);
+            this.progBar.Location = new System.Drawing.Point(24, 712);
             this.progBar.Name = "progBar";
             this.progBar.Size = new System.Drawing.Size(423, 23);
             this.progBar.Step = 1;
@@ -223,7 +237,7 @@
             this.testTabBox.Location = new System.Drawing.Point(358, 49);
             this.testTabBox.Name = "testTabBox";
             this.testTabBox.SelectedIndex = 0;
-            this.testTabBox.Size = new System.Drawing.Size(530, 589);
+            this.testTabBox.Size = new System.Drawing.Size(532, 646);
             this.testTabBox.TabIndex = 13;
             this.testTabBox.Deselected += new System.Windows.Forms.TabControlEventHandler(this.testTabBox_Deselected);
             // 
@@ -233,7 +247,7 @@
             this.suiteTab.Location = new System.Drawing.Point(4, 22);
             this.suiteTab.Name = "suiteTab";
             this.suiteTab.Padding = new System.Windows.Forms.Padding(3);
-            this.suiteTab.Size = new System.Drawing.Size(522, 563);
+            this.suiteTab.Size = new System.Drawing.Size(524, 620);
             this.suiteTab.TabIndex = 3;
             this.suiteTab.Text = "Suite";
             this.suiteTab.UseVisualStyleBackColor = true;
@@ -241,12 +255,12 @@
             // suiteTabControl
             // 
             this.suiteTabControl.Controls.Add(this.testSelTab);
-            this.suiteTabControl.Controls.Add(this.testResTab);
+            this.suiteTabControl.Controls.Add(this.ResultsTable);
             this.suiteTabControl.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.suiteTabControl.Location = new System.Drawing.Point(-4, 0);
             this.suiteTabControl.Name = "suiteTabControl";
             this.suiteTabControl.SelectedIndex = 0;
-            this.suiteTabControl.Size = new System.Drawing.Size(520, 557);
+            this.suiteTabControl.Size = new System.Drawing.Size(520, 624);
             this.suiteTabControl.TabIndex = 0;
             this.suiteTabControl.Deselected += new System.Windows.Forms.TabControlEventHandler(this.testTabBox_Deselected);
             // 
@@ -264,7 +278,7 @@
             this.testSelTab.Location = new System.Drawing.Point(4, 22);
             this.testSelTab.Name = "testSelTab";
             this.testSelTab.Padding = new System.Windows.Forms.Padding(3);
-            this.testSelTab.Size = new System.Drawing.Size(512, 531);
+            this.testSelTab.Size = new System.Drawing.Size(512, 598);
             this.testSelTab.TabIndex = 2;
             this.testSelTab.Text = "Tests";
             this.testSelTab.UseVisualStyleBackColor = true;
@@ -272,7 +286,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(291, 50);
+            this.label4.Location = new System.Drawing.Point(342, 50);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(118, 13);
             this.label4.TabIndex = 17;
@@ -281,7 +295,7 @@
             // 
             // textboxRootLocationFolder
             // 
-            this.textboxRootLocationFolder.Location = new System.Drawing.Point(294, 66);
+            this.textboxRootLocationFolder.Location = new System.Drawing.Point(342, 66);
             this.textboxRootLocationFolder.Name = "textboxRootLocationFolder";
             this.textboxRootLocationFolder.Size = new System.Drawing.Size(113, 22);
             this.textboxRootLocationFolder.TabIndex = 16;
@@ -291,7 +305,7 @@
             // 
             this.publishTestLabel.AutoSize = true;
             this.publishTestLabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.publishTestLabel.Location = new System.Drawing.Point(12, 236);
+            this.publishTestLabel.Location = new System.Drawing.Point(31, 274);
             this.publishTestLabel.Name = "publishTestLabel";
             this.publishTestLabel.Size = new System.Drawing.Size(64, 13);
             this.publishTestLabel.TabIndex = 15;
@@ -301,7 +315,7 @@
             // 
             this.appendTestLabel.AutoSize = true;
             this.appendTestLabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.appendTestLabel.Location = new System.Drawing.Point(12, 34);
+            this.appendTestLabel.Location = new System.Drawing.Point(31, 39);
             this.appendTestLabel.Name = "appendTestLabel";
             this.appendTestLabel.Size = new System.Drawing.Size(84, 13);
             this.appendTestLabel.TabIndex = 14;
@@ -312,16 +326,16 @@
             this.pubTestSelectBox.BackColor = System.Drawing.SystemColors.Window;
             this.pubTestSelectBox.CheckOnClick = true;
             this.pubTestSelectBox.FormattingEnabled = true;
-            this.pubTestSelectBox.Location = new System.Drawing.Point(6, 255);
+            this.pubTestSelectBox.Location = new System.Drawing.Point(31, 290);
             this.pubTestSelectBox.Name = "pubTestSelectBox";
-            this.pubTestSelectBox.Size = new System.Drawing.Size(282, 259);
+            this.pubTestSelectBox.Size = new System.Drawing.Size(282, 293);
             this.pubTestSelectBox.TabIndex = 13;
             this.pubTestSelectBox.SelectedIndexChanged += new System.EventHandler(this.checkedListBox1_SelectedIndexChanged);
             // 
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(6, 6);
+            this.checkBox1.Location = new System.Drawing.Point(31, 11);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(72, 17);
             this.checkBox1.TabIndex = 12;
@@ -335,161 +349,109 @@
                         | System.Windows.Forms.AnchorStyles.Left)));
             this.appTestSelectBox.CheckOnClick = true;
             this.appTestSelectBox.FormattingEnabled = true;
-            this.appTestSelectBox.Location = new System.Drawing.Point(6, 50);
+            this.appTestSelectBox.Location = new System.Drawing.Point(31, 55);
             this.appTestSelectBox.Name = "appTestSelectBox";
-            this.appTestSelectBox.Size = new System.Drawing.Size(282, 174);
+            this.appTestSelectBox.Size = new System.Drawing.Size(282, 208);
             this.appTestSelectBox.TabIndex = 11;
             this.appTestSelectBox.SelectedIndexChanged += new System.EventHandler(this.checkedListBox1_SelectedIndexChanged);
             // 
-            // testResTab
+            // ResultsTable
             // 
-            this.testResTab.AutoScroll = true;
-            this.testResTab.Controls.Add(this.label12);
-            this.testResTab.Controls.Add(this.totalTimeBox);
-            this.testResTab.Controls.Add(this.label5);
-            this.testResTab.Controls.Add(this.pubTimeBox);
-            this.testResTab.Controls.Add(this.acqTimeBox);
-            this.testResTab.Controls.Add(this.pubResultLabel);
-            this.testResTab.Controls.Add(this.pubResultBox);
-            this.testResTab.Controls.Add(this.pubTestBox);
-            this.testResTab.Controls.Add(this.appResultLabel);
-            this.testResTab.Controls.Add(this.appTestBox);
-            this.testResTab.Controls.Add(this.appResultBox);
-            this.testResTab.Controls.Add(this.resBoxLabel);
-            this.testResTab.Location = new System.Drawing.Point(4, 22);
-            this.testResTab.Name = "testResTab";
-            this.testResTab.Padding = new System.Windows.Forms.Padding(3);
-            this.testResTab.Size = new System.Drawing.Size(512, 531);
-            this.testResTab.TabIndex = 3;
-            this.testResTab.Text = "Results";
-            this.testResTab.UseVisualStyleBackColor = true;
+            this.ResultsTable.Controls.Add(this.label16);
+            this.ResultsTable.Controls.Add(this.pubResultGridViewPublish);
+            this.ResultsTable.Controls.Add(this.label15);
+            this.ResultsTable.Controls.Add(this.AcqResultGridView);
+            this.ResultsTable.Location = new System.Drawing.Point(4, 22);
+            this.ResultsTable.Name = "ResultsTable";
+            this.ResultsTable.Padding = new System.Windows.Forms.Padding(3);
+            this.ResultsTable.Size = new System.Drawing.Size(512, 598);
+            this.ResultsTable.TabIndex = 4;
+            this.ResultsTable.Text = "Results";
+            this.ResultsTable.UseVisualStyleBackColor = true;
             // 
-            // label12
+            // label16
             // 
-            this.label12.AutoSize = true;
-            this.label12.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label12.Location = new System.Drawing.Point(341, 507);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(57, 13);
-            this.label12.TabIndex = 23;
-            this.label12.Text = "Total (sec)";
+            this.label16.AutoSize = true;
+            this.label16.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label16.Location = new System.Drawing.Point(28, 265);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(64, 13);
+            this.label16.TabIndex = 18;
+            this.label16.Text = "Publish API";
             // 
-            // totalTimeBox
+            // pubResultGridViewPublish
             // 
-            this.totalTimeBox.BackColor = System.Drawing.Color.Gainsboro;
-            this.totalTimeBox.Location = new System.Drawing.Point(402, 504);
-            this.totalTimeBox.Name = "totalTimeBox";
-            this.totalTimeBox.ReadOnly = true;
-            this.totalTimeBox.Size = new System.Drawing.Size(100, 22);
-            this.totalTimeBox.TabIndex = 22;
+            this.pubResultGridViewPublish.AllowUserToAddRows = false;
+            this.pubResultGridViewPublish.AllowUserToDeleteRows = false;
+            this.pubResultGridViewPublish.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCellsExceptHeaders;
+            this.pubResultGridViewPublish.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.pubResultGridViewPublish.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.pubTestName,
+            this.pubTestResult,
+            this.pubTestTime});
+            this.pubResultGridViewPublish.Location = new System.Drawing.Point(26, 284);
+            this.pubResultGridViewPublish.Name = "pubResultGridViewPublish";
+            this.pubResultGridViewPublish.RowHeadersVisible = false;
+            this.pubResultGridViewPublish.Size = new System.Drawing.Size(461, 293);
+            this.pubResultGridViewPublish.TabIndex = 17;
             // 
-            // label5
+            // pubTestName
             // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(398, 28);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(55, 13);
-            this.label5.TabIndex = 21;
-            this.label5.Text = "Time (sec)";
+            this.pubTestName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.pubTestName.HeaderText = "TestName";
+            this.pubTestName.Name = "pubTestName";
             // 
-            // pubTimeBox
+            // pubTestResult
             // 
-            this.pubTimeBox.BackColor = System.Drawing.Color.Gainsboro;
-            this.pubTimeBox.Location = new System.Drawing.Point(402, 233);
-            this.pubTimeBox.Multiline = true;
-            this.pubTimeBox.Name = "pubTimeBox";
-            this.pubTimeBox.ReadOnly = true;
-            this.pubTimeBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.pubTimeBox.Size = new System.Drawing.Size(104, 264);
-            this.pubTimeBox.TabIndex = 20;
+            this.pubTestResult.HeaderText = "Result";
+            this.pubTestResult.Name = "pubTestResult";
             // 
-            // acqTimeBox
+            // pubTestTime
             // 
-            this.acqTimeBox.BackColor = System.Drawing.Color.Gainsboro;
-            this.acqTimeBox.Location = new System.Drawing.Point(401, 44);
-            this.acqTimeBox.Multiline = true;
-            this.acqTimeBox.Name = "acqTimeBox";
-            this.acqTimeBox.ReadOnly = true;
-            this.acqTimeBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.acqTimeBox.Size = new System.Drawing.Size(105, 170);
-            this.acqTimeBox.TabIndex = 19;
+            this.pubTestTime.HeaderText = "Time (sec)";
+            this.pubTestTime.Name = "pubTestTime";
             // 
-            // pubResultLabel
+            // label15
             // 
-            this.pubResultLabel.AutoSize = true;
-            this.pubResultLabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.pubResultLabel.Location = new System.Drawing.Point(3, 217);
-            this.pubResultLabel.Name = "pubResultLabel";
-            this.pubResultLabel.Size = new System.Drawing.Size(64, 13);
-            this.pubResultLabel.TabIndex = 18;
-            this.pubResultLabel.Text = "Publish API";
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label15.Location = new System.Drawing.Point(28, 8);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(84, 13);
+            this.label15.TabIndex = 16;
+            this.label15.Text = "Acquisition API";
             // 
-            // pubResultBox
+            // AcqResultGridView
             // 
-            this.pubResultBox.BackColor = System.Drawing.Color.Gainsboro;
-            this.pubResultBox.Location = new System.Drawing.Point(293, 233);
-            this.pubResultBox.Multiline = true;
-            this.pubResultBox.Name = "pubResultBox";
-            this.pubResultBox.ReadOnly = true;
-            this.pubResultBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.pubResultBox.Size = new System.Drawing.Size(103, 265);
-            this.pubResultBox.TabIndex = 17;
-            this.pubResultBox.WordWrap = false;
+            this.AcqResultGridView.AllowUserToAddRows = false;
+            this.AcqResultGridView.AllowUserToDeleteRows = false;
+            this.AcqResultGridView.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCellsExceptHeaders;
+            this.AcqResultGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.AcqResultGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.acqTestName,
+            this.acqTestResult,
+            this.acqTestTime});
+            this.AcqResultGridView.Location = new System.Drawing.Point(26, 25);
+            this.AcqResultGridView.Name = "AcqResultGridView";
+            this.AcqResultGridView.RowHeadersVisible = false;
+            this.AcqResultGridView.Size = new System.Drawing.Size(461, 233);
+            this.AcqResultGridView.TabIndex = 0;
             // 
-            // pubTestBox
+            // acqTestName
             // 
-            this.pubTestBox.BackColor = System.Drawing.Color.Gainsboro;
-            this.pubTestBox.Location = new System.Drawing.Point(5, 233);
-            this.pubTestBox.Multiline = true;
-            this.pubTestBox.Name = "pubTestBox";
-            this.pubTestBox.ReadOnly = true;
-            this.pubTestBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.pubTestBox.Size = new System.Drawing.Size(280, 265);
-            this.pubTestBox.TabIndex = 16;
+            this.acqTestName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.acqTestName.HeaderText = "TestName";
+            this.acqTestName.Name = "acqTestName";
             // 
-            // appResultLabel
+            // acqTestResult
             // 
-            this.appResultLabel.AutoSize = true;
-            this.appResultLabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.appResultLabel.Location = new System.Drawing.Point(6, 27);
-            this.appResultLabel.Name = "appResultLabel";
-            this.appResultLabel.Size = new System.Drawing.Size(84, 13);
-            this.appResultLabel.TabIndex = 15;
-            this.appResultLabel.Text = "Acquisition API";
+            this.acqTestResult.HeaderText = "Result";
+            this.acqTestResult.Name = "acqTestResult";
             // 
-            // appTestBox
+            // acqTestTime
             // 
-            this.appTestBox.BackColor = System.Drawing.Color.Gainsboro;
-            this.appTestBox.Location = new System.Drawing.Point(5, 44);
-            this.appTestBox.Multiline = true;
-            this.appTestBox.Name = "appTestBox";
-            this.appTestBox.ReadOnly = true;
-            this.appTestBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.appTestBox.Size = new System.Drawing.Size(280, 170);
-            this.appTestBox.TabIndex = 10;
-            // 
-            // appResultBox
-            // 
-            this.appResultBox.BackColor = System.Drawing.Color.Gainsboro;
-            this.appResultBox.Location = new System.Drawing.Point(292, 43);
-            this.appResultBox.Multiline = true;
-            this.appResultBox.Name = "appResultBox";
-            this.appResultBox.ReadOnly = true;
-            this.appResultBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.appResultBox.Size = new System.Drawing.Size(103, 171);
-            this.appResultBox.TabIndex = 11;
-            this.appResultBox.WordWrap = false;
-            // 
-            // resBoxLabel
-            // 
-            this.resBoxLabel.AutoSize = true;
-            this.resBoxLabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.resBoxLabel.Location = new System.Drawing.Point(289, 27);
-            this.resBoxLabel.Name = "resBoxLabel";
-            this.resBoxLabel.Size = new System.Drawing.Size(39, 13);
-            this.resBoxLabel.TabIndex = 12;
-            this.resBoxLabel.Text = "Result";
+            this.acqTestTime.HeaderText = "Time (sec)";
+            this.acqTestTime.Name = "acqTestTime";
             // 
             // userDefTab
             // 
@@ -512,7 +474,7 @@
             this.userDefTab.Controls.Add(this.fileBrowseButton);
             this.userDefTab.Location = new System.Drawing.Point(4, 22);
             this.userDefTab.Name = "userDefTab";
-            this.userDefTab.Size = new System.Drawing.Size(416, 563);
+            this.userDefTab.Size = new System.Drawing.Size(522, 612);
             this.userDefTab.TabIndex = 2;
             this.userDefTab.Text = "Custom";
             this.userDefTab.UseVisualStyleBackColor = true;
@@ -696,7 +658,7 @@
             this.contAppendTest.Controls.Add(this.contLabelLabel);
             this.contAppendTest.Location = new System.Drawing.Point(4, 22);
             this.contAppendTest.Name = "contAppendTest";
-            this.contAppendTest.Size = new System.Drawing.Size(416, 563);
+            this.contAppendTest.Size = new System.Drawing.Size(522, 612);
             this.contAppendTest.TabIndex = 4;
             this.contAppendTest.Text = "Cont. Append";
             this.contAppendTest.UseVisualStyleBackColor = true;
@@ -1160,6 +1122,156 @@
             this.contLabelLabel.TabIndex = 3;
             this.contLabelLabel.Text = "Label";
             // 
+            // testResTab
+            // 
+            this.testResTab.AutoScroll = true;
+            this.testResTab.Controls.Add(this.label12);
+            this.testResTab.Controls.Add(this.totalTimeBox);
+            this.testResTab.Controls.Add(this.label5);
+            this.testResTab.Controls.Add(this.pubTimeBox);
+            this.testResTab.Controls.Add(this.acqTimeBox);
+            this.testResTab.Controls.Add(this.pubResultLabel);
+            this.testResTab.Controls.Add(this.pubResultBox);
+            this.testResTab.Controls.Add(this.pubTestBox);
+            this.testResTab.Controls.Add(this.appResultLabel);
+            this.testResTab.Controls.Add(this.appTestBox);
+            this.testResTab.Controls.Add(this.appResultBox);
+            this.testResTab.Controls.Add(this.resBoxLabel);
+            this.testResTab.Location = new System.Drawing.Point(4, 22);
+            this.testResTab.Name = "testResTab";
+            this.testResTab.Padding = new System.Windows.Forms.Padding(3);
+            this.testResTab.Size = new System.Drawing.Size(512, 531);
+            this.testResTab.TabIndex = 3;
+            this.testResTab.Text = "Results";
+            this.testResTab.UseVisualStyleBackColor = true;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label12.Location = new System.Drawing.Point(341, 507);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(57, 13);
+            this.label12.TabIndex = 23;
+            this.label12.Text = "Total (sec)";
+            // 
+            // totalTimeBox
+            // 
+            this.totalTimeBox.BackColor = System.Drawing.Color.Gainsboro;
+            this.totalTimeBox.Location = new System.Drawing.Point(402, 504);
+            this.totalTimeBox.Name = "totalTimeBox";
+            this.totalTimeBox.ReadOnly = true;
+            this.totalTimeBox.Size = new System.Drawing.Size(100, 20);
+            this.totalTimeBox.TabIndex = 22;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(398, 28);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(55, 13);
+            this.label5.TabIndex = 21;
+            this.label5.Text = "Time (sec)";
+            // 
+            // pubTimeBox
+            // 
+            this.pubTimeBox.BackColor = System.Drawing.Color.Gainsboro;
+            this.pubTimeBox.Location = new System.Drawing.Point(402, 233);
+            this.pubTimeBox.Multiline = true;
+            this.pubTimeBox.Name = "pubTimeBox";
+            this.pubTimeBox.ReadOnly = true;
+            this.pubTimeBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.pubTimeBox.Size = new System.Drawing.Size(104, 264);
+            this.pubTimeBox.TabIndex = 20;
+            // 
+            // acqTimeBox
+            // 
+            this.acqTimeBox.BackColor = System.Drawing.Color.Gainsboro;
+            this.acqTimeBox.Location = new System.Drawing.Point(401, 44);
+            this.acqTimeBox.Multiline = true;
+            this.acqTimeBox.Name = "acqTimeBox";
+            this.acqTimeBox.ReadOnly = true;
+            this.acqTimeBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.acqTimeBox.Size = new System.Drawing.Size(105, 170);
+            this.acqTimeBox.TabIndex = 19;
+            // 
+            // pubResultLabel
+            // 
+            this.pubResultLabel.AutoSize = true;
+            this.pubResultLabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.pubResultLabel.Location = new System.Drawing.Point(3, 217);
+            this.pubResultLabel.Name = "pubResultLabel";
+            this.pubResultLabel.Size = new System.Drawing.Size(64, 13);
+            this.pubResultLabel.TabIndex = 18;
+            this.pubResultLabel.Text = "Publish API";
+            // 
+            // pubResultBox
+            // 
+            this.pubResultBox.BackColor = System.Drawing.Color.Gainsboro;
+            this.pubResultBox.Location = new System.Drawing.Point(293, 233);
+            this.pubResultBox.Multiline = true;
+            this.pubResultBox.Name = "pubResultBox";
+            this.pubResultBox.ReadOnly = true;
+            this.pubResultBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.pubResultBox.Size = new System.Drawing.Size(103, 265);
+            this.pubResultBox.TabIndex = 17;
+            this.pubResultBox.WordWrap = false;
+            // 
+            // pubTestBox
+            // 
+            this.pubTestBox.BackColor = System.Drawing.Color.Gainsboro;
+            this.pubTestBox.Location = new System.Drawing.Point(5, 233);
+            this.pubTestBox.Multiline = true;
+            this.pubTestBox.Name = "pubTestBox";
+            this.pubTestBox.ReadOnly = true;
+            this.pubTestBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.pubTestBox.Size = new System.Drawing.Size(280, 265);
+            this.pubTestBox.TabIndex = 16;
+            // 
+            // appResultLabel
+            // 
+            this.appResultLabel.AutoSize = true;
+            this.appResultLabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.appResultLabel.Location = new System.Drawing.Point(6, 27);
+            this.appResultLabel.Name = "appResultLabel";
+            this.appResultLabel.Size = new System.Drawing.Size(84, 13);
+            this.appResultLabel.TabIndex = 15;
+            this.appResultLabel.Text = "Acquisition API";
+            // 
+            // appTestBox
+            // 
+            this.appTestBox.BackColor = System.Drawing.Color.Gainsboro;
+            this.appTestBox.Location = new System.Drawing.Point(5, 44);
+            this.appTestBox.Multiline = true;
+            this.appTestBox.Name = "appTestBox";
+            this.appTestBox.ReadOnly = true;
+            this.appTestBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.appTestBox.Size = new System.Drawing.Size(280, 170);
+            this.appTestBox.TabIndex = 10;
+            // 
+            // appResultBox
+            // 
+            this.appResultBox.BackColor = System.Drawing.Color.Gainsboro;
+            this.appResultBox.Location = new System.Drawing.Point(292, 43);
+            this.appResultBox.Multiline = true;
+            this.appResultBox.Name = "appResultBox";
+            this.appResultBox.ReadOnly = true;
+            this.appResultBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.appResultBox.Size = new System.Drawing.Size(103, 171);
+            this.appResultBox.TabIndex = 11;
+            this.appResultBox.WordWrap = false;
+            // 
+            // resBoxLabel
+            // 
+            this.resBoxLabel.AutoSize = true;
+            this.resBoxLabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.resBoxLabel.Location = new System.Drawing.Point(289, 27);
+            this.resBoxLabel.Name = "resBoxLabel";
+            this.resBoxLabel.Size = new System.Drawing.Size(39, 13);
+            this.resBoxLabel.TabIndex = 12;
+            this.resBoxLabel.Text = "Result";
+            // 
             // openLogButton
             // 
             this.openLogButton.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1176,7 +1288,7 @@
             this.srvSet.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.srvSet.Enabled = false;
             this.srvSet.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.srvSet.Location = new System.Drawing.Point(237, 6);
+            this.srvSet.Location = new System.Drawing.Point(258, 6);
             this.srvSet.Name = "srvSet";
             this.srvSet.Size = new System.Drawing.Size(91, 23);
             this.srvSet.TabIndex = 2;
@@ -1219,7 +1331,7 @@
             this.lstLocations.Location = new System.Drawing.Point(18, 71);
             this.lstLocations.MultiSelect = false;
             this.lstLocations.Name = "lstLocations";
-            this.lstLocations.Size = new System.Drawing.Size(321, 548);
+            this.lstLocations.Size = new System.Drawing.Size(321, 619);
             this.lstLocations.TabIndex = 20;
             this.lstLocations.UseCompatibleStateImageBehavior = false;
             this.lstLocations.View = System.Windows.Forms.View.Details;
@@ -1265,7 +1377,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(881, 668);
+            this.ClientSize = new System.Drawing.Size(902, 736);
             this.Controls.Add(this.chkGetAllLocations);
             this.Controls.Add(this.btnSetLocation);
             this.Controls.Add(this.lstLocations);
@@ -1291,8 +1403,10 @@
             this.suiteTabControl.ResumeLayout(false);
             this.testSelTab.ResumeLayout(false);
             this.testSelTab.PerformLayout();
-            this.testResTab.ResumeLayout(false);
-            this.testResTab.PerformLayout();
+            this.ResultsTable.ResumeLayout(false);
+            this.ResultsTable.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pubResultGridViewPublish)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.AcqResultGridView)).EndInit();
             this.userDefTab.ResumeLayout(false);
             this.userDefTab.PerformLayout();
             this.contAppendTest.ResumeLayout(false);
@@ -1301,6 +1415,8 @@
             this.contAppPanel.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.testResTab.ResumeLayout(false);
+            this.testResTab.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1415,6 +1531,17 @@
         private System.Windows.Forms.Button btnSetLocation;
         private System.Windows.Forms.ColumnHeader LocID;
         private System.Windows.Forms.CheckBox chkGetAllLocations;
+        private System.Windows.Forms.TabPage ResultsTable;
+        private System.Windows.Forms.DataGridView AcqResultGridView;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.DataGridView pubResultGridViewPublish;
+        private System.Windows.Forms.DataGridViewTextBoxColumn pubTestName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn pubTestResult;
+        private System.Windows.Forms.DataGridViewTextBoxColumn pubTestTime;
+        private System.Windows.Forms.DataGridViewTextBoxColumn acqTestName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn acqTestResult;
+        private System.Windows.Forms.DataGridViewTextBoxColumn acqTestTime;
     }
 }
 

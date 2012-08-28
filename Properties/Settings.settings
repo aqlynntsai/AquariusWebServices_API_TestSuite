@@ -3,10 +3,10 @@
   <Profiles />
   <Settings>
     <Setting Name="Server" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">""</Value>
     </Setting>
     <Setting Name="GetAllLocations" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>
