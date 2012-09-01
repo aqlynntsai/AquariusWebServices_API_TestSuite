@@ -118,6 +118,8 @@ namespace API_TestSuite_GUI
                 InitializeComponent();
                 InitializeTestInfo();
                 PopulateTestListUI();
+
+                initializeTestTree();
                 gotClients = false;
             }
             catch (Exception e)
@@ -985,6 +987,8 @@ namespace API_TestSuite_GUI
 
                     startTestButton.Enabled = true;
                     contStartButton.Enabled = true;
+                    populateAPIButton.Enabled = true;
+
                     lstLocations.Items.Clear();
                     try
                     {
@@ -1344,7 +1348,10 @@ namespace API_TestSuite_GUI
             Properties.Settings.Default.Save();
         }
 
-
+        private void button_populate_Click(object sender, EventArgs e)
+        {
+            populateManualTestMethods();
+        }
     }
 
     public class CustomAppendWatcher

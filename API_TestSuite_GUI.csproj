@@ -57,6 +57,9 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="ManualEntryTests.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="PwBox.cs">
       <SubType>Form</SubType>
     </Compile>

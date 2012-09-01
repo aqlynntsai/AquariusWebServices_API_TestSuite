@@ -57,6 +57,13 @@
             this.acqTestName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.acqTestResult = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.acqTestTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ManualEntry = new System.Windows.Forms.TabPage();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.populateAPIButton = new System.Windows.Forms.Button();
+            this.treeView1 = new System.Windows.Forms.TreeView();
+            this.invokeAPIButton = new System.Windows.Forms.Button();
+            this.labelApiName = new System.Windows.Forms.Label();
+            this.textBoxApiReturn = new System.Windows.Forms.TextBox();
             this.userDefTab = new System.Windows.Forms.TabPage();
             this.label7 = new System.Windows.Forms.Label();
             this.customDelButton = new System.Windows.Forms.Button();
@@ -146,6 +153,9 @@
             this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
             this.btnSetLocation = new System.Windows.Forms.Button();
             this.chkGetAllLocations = new System.Windows.Forms.CheckBox();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.apiParamsDataGridView = new API_TestSuite_GUI.apiParamArgGrid();
             this.testTabBox.SuspendLayout();
             this.suiteTab.SuspendLayout();
             this.suiteTabControl.SuspendLayout();
@@ -153,11 +163,16 @@
             this.ResultsTable.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pubResultGridViewPublish)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.AcqResultGridView)).BeginInit();
+            this.ManualEntry.SuspendLayout();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
             this.userDefTab.SuspendLayout();
             this.contAppendTest.SuspendLayout();
             this.contAppPanel.SuspendLayout();
             this.panel1.SuspendLayout();
             this.testResTab.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.apiParamsDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // textBoxHost
@@ -182,7 +197,7 @@
             // 
             this.startTestButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.startTestButton.Enabled = false;
-            this.startTestButton.Location = new System.Drawing.Point(342, 503);
+            this.startTestButton.Location = new System.Drawing.Point(342, 560);
             this.startTestButton.Name = "startTestButton";
             this.startTestButton.Size = new System.Drawing.Size(97, 23);
             this.startTestButton.TabIndex = 5;
@@ -256,6 +271,7 @@
             // 
             this.suiteTabControl.Controls.Add(this.testSelTab);
             this.suiteTabControl.Controls.Add(this.ResultsTable);
+            this.suiteTabControl.Controls.Add(this.ManualEntry);
             this.suiteTabControl.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.suiteTabControl.Location = new System.Drawing.Point(-4, 0);
             this.suiteTabControl.Name = "suiteTabControl";
@@ -453,6 +469,86 @@
             this.acqTestTime.HeaderText = "Time (sec)";
             this.acqTestTime.Name = "acqTestTime";
             // 
+            // ManualEntry
+            // 
+            this.ManualEntry.Controls.Add(this.splitContainer1);
+            this.ManualEntry.Location = new System.Drawing.Point(4, 22);
+            this.ManualEntry.Name = "ManualEntry";
+            this.ManualEntry.Padding = new System.Windows.Forms.Padding(3);
+            this.ManualEntry.Size = new System.Drawing.Size(512, 598);
+            this.ManualEntry.TabIndex = 5;
+            this.ManualEntry.Text = "Manual Entry Mode";
+            this.ManualEntry.UseVisualStyleBackColor = true;
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(3, 3);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.populateAPIButton);
+            this.splitContainer1.Panel1.Controls.Add(this.treeView1);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.invokeAPIButton);
+            this.splitContainer1.Panel2.Controls.Add(this.apiParamsDataGridView);
+            this.splitContainer1.Panel2.Controls.Add(this.labelApiName);
+            this.splitContainer1.Panel2.Controls.Add(this.textBoxApiReturn);
+            this.splitContainer1.Size = new System.Drawing.Size(506, 592);
+            this.splitContainer1.SplitterDistance = 204;
+            this.splitContainer1.TabIndex = 0;
+            // 
+            // populateAPIButton
+            // 
+            this.populateAPIButton.Enabled = false;
+            this.populateAPIButton.Location = new System.Drawing.Point(54, 13);
+            this.populateAPIButton.Name = "populateAPIButton";
+            this.populateAPIButton.Size = new System.Drawing.Size(97, 23);
+            this.populateAPIButton.TabIndex = 1;
+            this.populateAPIButton.Text = "Populate APIs";
+            this.populateAPIButton.UseVisualStyleBackColor = true;
+            this.populateAPIButton.Click += new System.EventHandler(this.button_populate_Click);
+            // 
+            // treeView1
+            // 
+            this.treeView1.Location = new System.Drawing.Point(3, 46);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.Size = new System.Drawing.Size(198, 543);
+            this.treeView1.TabIndex = 0;
+            this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
+            // 
+            // invokeAPIButton
+            // 
+            this.invokeAPIButton.Enabled = false;
+            this.invokeAPIButton.Location = new System.Drawing.Point(101, 342);
+            this.invokeAPIButton.Name = "invokeAPIButton";
+            this.invokeAPIButton.Size = new System.Drawing.Size(97, 23);
+            this.invokeAPIButton.TabIndex = 3;
+            this.invokeAPIButton.Text = "Invoke API";
+            this.invokeAPIButton.UseVisualStyleBackColor = true;
+            this.invokeAPIButton.Click += new System.EventHandler(this.invokeAPIButton_Click);
+            // 
+            // labelApiName
+            // 
+            this.labelApiName.AllowDrop = true;
+            this.labelApiName.Location = new System.Drawing.Point(16, 13);
+            this.labelApiName.Name = "labelApiName";
+            this.labelApiName.Size = new System.Drawing.Size(263, 97);
+            this.labelApiName.TabIndex = 1;
+            this.labelApiName.Text = "Method: ";
+            // 
+            // textBoxApiReturn
+            // 
+            this.textBoxApiReturn.Location = new System.Drawing.Point(16, 382);
+            this.textBoxApiReturn.Multiline = true;
+            this.textBoxApiReturn.Name = "textBoxApiReturn";
+            this.textBoxApiReturn.ReadOnly = true;
+            this.textBoxApiReturn.Size = new System.Drawing.Size(263, 189);
+            this.textBoxApiReturn.TabIndex = 0;
+            // 
             // userDefTab
             // 
             this.userDefTab.Controls.Add(this.label7);
@@ -474,7 +570,7 @@
             this.userDefTab.Controls.Add(this.fileBrowseButton);
             this.userDefTab.Location = new System.Drawing.Point(4, 22);
             this.userDefTab.Name = "userDefTab";
-            this.userDefTab.Size = new System.Drawing.Size(522, 612);
+            this.userDefTab.Size = new System.Drawing.Size(524, 620);
             this.userDefTab.TabIndex = 2;
             this.userDefTab.Text = "Custom";
             this.userDefTab.UseVisualStyleBackColor = true;
@@ -658,7 +754,7 @@
             this.contAppendTest.Controls.Add(this.contLabelLabel);
             this.contAppendTest.Location = new System.Drawing.Point(4, 22);
             this.contAppendTest.Name = "contAppendTest";
-            this.contAppendTest.Size = new System.Drawing.Size(522, 612);
+            this.contAppendTest.Size = new System.Drawing.Size(524, 620);
             this.contAppendTest.TabIndex = 4;
             this.contAppendTest.Text = "Cont. Append";
             this.contAppendTest.UseVisualStyleBackColor = true;
@@ -1373,6 +1469,27 @@
             this.chkGetAllLocations.Text = "GetAllLocations";
             this.chkGetAllLocations.UseVisualStyleBackColor = true;
             // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.HeaderText = "Parameter";
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.HeaderText = "Argument";
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            // 
+            // apiParamsDataGridView
+            // 
+            this.apiParamsDataGridView.AllowUserToAddRows = false;
+            this.apiParamsDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.apiParamsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.apiParamsDataGridView.Location = new System.Drawing.Point(19, 122);
+            this.apiParamsDataGridView.Name = "apiParamsDataGridView";
+            this.apiParamsDataGridView.RowHeadersVisible = false;
+            this.apiParamsDataGridView.Size = new System.Drawing.Size(263, 203);
+            this.apiParamsDataGridView.TabIndex = 2;
+            // 
             // TestSuite
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1407,6 +1524,11 @@
             this.ResultsTable.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pubResultGridViewPublish)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.AcqResultGridView)).EndInit();
+            this.ManualEntry.ResumeLayout(false);
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
+            this.splitContainer1.ResumeLayout(false);
             this.userDefTab.ResumeLayout(false);
             this.userDefTab.PerformLayout();
             this.contAppendTest.ResumeLayout(false);
@@ -1417,6 +1539,7 @@
             this.panel1.PerformLayout();
             this.testResTab.ResumeLayout(false);
             this.testResTab.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.apiParamsDataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1542,6 +1665,16 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn acqTestName;
         private System.Windows.Forms.DataGridViewTextBoxColumn acqTestResult;
         private System.Windows.Forms.DataGridViewTextBoxColumn acqTestTime;
+        private System.Windows.Forms.TabPage ManualEntry;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.TreeView treeView1;
+        private System.Windows.Forms.Button populateAPIButton;
+        private System.Windows.Forms.TextBox textBoxApiReturn;
+        private System.Windows.Forms.Label labelApiName;
+        private apiParamArgGrid apiParamsDataGridView;
+        private System.Windows.Forms.Button invokeAPIButton;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
     }
 }
 

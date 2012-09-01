@@ -557,12 +557,12 @@ namespace Tests
         }
         public override void RunTest()
         {
+            LoggerStream(Name + ":");
             base.RunTest();
         }
 
         protected void testPublishServiceAPI(publishServiceMethodDelegate method)
         {
-            LoggerStream(Name + ":");
             string result = tryInvokePublishServiceMethod(method);
             if (result.Length > 0)
             {
@@ -2159,6 +2159,7 @@ namespace Tests
         }
         public override void RunTest()
         {
+            LoggerStream(Name + ":");
             base.RunTest();
         }
 
